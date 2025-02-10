@@ -3,7 +3,9 @@
 Test Técnico Desarrollador Backend - Torneo de Tenis
 
 Consigna:
+
 Se desea modelar el comportamiento de un torneo de tenis.
+
 •	La modalidad del torneo es por eliminación directa.
 •	Se puede asumir que la cantidad de jugadores es una potencia de 2.
 •	El torneo puede ser Femenino o Masculino.
