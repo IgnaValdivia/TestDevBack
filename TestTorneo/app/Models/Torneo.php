@@ -9,7 +9,7 @@ class Torneo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'tipo', 'ganador_id'];
+    protected $fillable = ['nombre', 'tipo', 'fecha', 'ganador_id'];
 
     public function partidas()
     {

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Torneo;
 use App\Models\Partida;
-use App\Models\Jugador;
 use App\Services\Interfaces\ITorneoService;
 use App\Services\Interfaces\IGanadorStrategy;
 use Illuminate\Support\Facades\DB;
@@ -22,25 +21,20 @@ class TorneoService implements ITorneoService
     {
         return DB::transaction(function () use ($torneoId) {
             $torneo = Torneo::with('jugadores')->find($torneoId);
-            if (!$torneo || $torneo->estado === 'Finalizado') {
-                return null;
-            }
-
             $jugadores = $torneo->jugadores()->get()->shuffle();
-            if (!$this->esPotenciaDeDos($jugadores->count())) {
-                return null;
-            }
-
-            return $this->ejecutarEliminacionDirecta($torneo, $jugadores);
+            return $this->jugarPartidas($torneo, $jugadores);
         });
     }
 
-    private function esPotenciaDeDos(int $num): bool
+    public function determinarGanador(Partida $partida)
     {
-        return ($num & ($num - 1)) === 0 && $num > 0;
+        return $this->ganadorStrategy->determinarGanador(
+            $partida->jugador1,
+            $partida->jugador2
+        );
     }
 
-    private function ejecutarEliminacionDirecta(Torneo $torneo, $jugadores): Torneo
+    private function jugarPartidas(Torneo $torneo, $jugadores): Torneo
     {
         $ronda = 1;
         while ($jugadores->count() > 1) {
@@ -64,5 +58,10 @@ class TorneoService implements ITorneoService
 
         $torneo->update(['ganador_id' => $jugadores->first()->id]);
         return $torneo;
+    }
+
+    public function totalPartidasJugadas(Torneo $torneo): int
+    {
+        return $torneo->partidas()->count();
     }
 }
