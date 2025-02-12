@@ -12,19 +12,6 @@ class Partida extends Model
 
     protected $fillable = ['jugador1_id', 'jugador2_id', 'ganador_id', 'ronda', 'torneo_id'];
 
-    private ITorneoService $torneoService;
-
-    public function __construct(ITorneoService $torneoService)
-    {
-        parent::__construct();
-        $this->torneoService = $torneoService;
-    }
-
-    public function tieneGanador(): bool
-    {
-        return $this->torneoService->determinarGanador($this) !== null;
-    }
-
     public function jugador1()
     {
         return $this->belongsTo(Jugador::class, 'jugador1_id');

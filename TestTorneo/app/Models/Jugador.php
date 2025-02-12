@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Jugador extends Model
+abstract class Jugador extends Model
 {
     use HasFactory;
 
@@ -15,4 +15,6 @@ class Jugador extends Model
     {
         return $this->belongsToMany(Torneo::class, 'torneo_jugador');
     }
+
+    abstract public function calcularPuntaje(): int;
 }

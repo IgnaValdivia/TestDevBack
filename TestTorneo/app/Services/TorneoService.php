@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Jugador;
 use App\Models\Torneo;
 use App\Models\Partida;
 use App\Services\Interfaces\ITorneoService;
@@ -17,47 +18,36 @@ class TorneoService implements ITorneoService
         $this->ganadorStrategy = $ganadorStrategy;
     }
 
+    public function crearPartida(Torneo $torneo, int $jugador1, int $jugador2, int $ronda): Partida
+    {
+        return Partida::create([
+            'torneo_id' => $torneo->id,
+            'jugador1_id' => $jugador1,
+            'jugador2_id' => $jugador2,
+            'ronda' => $ronda
+        ]);
+    }
+
     public function comenzarTorneo(int $torneoId): ?Torneo
     {
-        return DB::transaction(function () use ($torneoId) {
-            $torneo = Torneo::with('jugadores')->find($torneoId);
-            $jugadores = $torneo->jugadores()->get()->shuffle();
-            return $this->jugarPartidas($torneo, $jugadores);
-        });
+        return new Torneo();
     }
 
     public function determinarGanador(Partida $partida)
     {
-        return $this->ganadorStrategy->determinarGanador(
+        $ganador = $this->ganadorStrategy->determinarGanador(
             $partida->jugador1,
             $partida->jugador2
         );
+
+        $partida->update(['ganador_id' => $ganador->id]);
+
+        return $ganador;
     }
 
     private function jugarPartidas(Torneo $torneo, $jugadores): Torneo
     {
-        $ronda = 1;
-        while ($jugadores->count() > 1) {
-            $nuevaRonda = collect();
-            for ($i = 0; $i < $jugadores->count(); $i += 2) {
-                $partida = Partida::create([
-                    'jugador1_id' => $jugadores[$i]->id,
-                    'jugador2_id' => $jugadores[$i + 1]->id,
-                    'ganador_id' => null,
-                    'ronda' => $ronda,
-                    'torneo_id' => $torneo->id
-                ]);
-
-                $ganador = $this->ganadorStrategy->determinarGanador($jugadores[$i], $jugadores[$i + 1]);
-                $partida->update(['ganador_id' => $ganador->id]);
-                $nuevaRonda->push($ganador);
-            }
-            $jugadores = $nuevaRonda;
-            $ronda++;
-        }
-
-        $torneo->update(['ganador_id' => $jugadores->first()->id]);
-        return $torneo;
+        return new Torneo();
     }
 
     public function totalPartidasJugadas(Torneo $torneo): int
