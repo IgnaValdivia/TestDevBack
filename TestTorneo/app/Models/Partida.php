@@ -14,17 +14,17 @@ class Partida extends Model
 
     public function jugador1()
     {
-        return $this->belongsTo(Jugador::class, 'jugador1_id');
+        return $this->morphTo();
     }
 
     public function jugador2()
     {
-        return $this->belongsTo(Jugador::class, 'jugador2_id');
+        return $this->morphTo();
     }
 
     public function ganador()
     {
-        return $this->belongsTo(Jugador::class, 'ganador_id');
+        return $this->morphTo();
     }
 
     public function torneo()

@@ -8,6 +8,11 @@ class JugadorMasculino extends Jugador
 
     protected $fillable = ['id', 'fuerza', 'velocidad'];
 
+    public function partidas()
+    {
+        return $this->morphMany(Partida::class, 'jugador');
+    }
+
     public function calcularPuntaje(): int
     {
         return $this->habilidad + $this->fuerza + $this->velocidad + rand(0, 10);
