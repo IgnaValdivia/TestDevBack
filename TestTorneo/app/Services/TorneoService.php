@@ -7,8 +7,8 @@ use App\Interfaces\Repositories\ITorneoRepository;
 use App\Models\Jugador;
 use App\Models\Torneo;
 use App\Models\Partida;
-use App\Services\Interfaces\ITorneoService;
-use App\Services\Interfaces\IGanadorStrategy;
+use App\Interfaces\ITorneoService;
+use App\Interfaces\IGanadorStrategy;
 use Illuminate\Support\Facades\DB;
 
 class TorneoService implements ITorneoService

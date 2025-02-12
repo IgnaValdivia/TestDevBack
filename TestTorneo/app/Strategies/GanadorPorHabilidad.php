@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\Strategies;
+namespace App\Strategies;
 
 use App\Models\Jugador;
-use App\Services\Interfaces\IGanadorStrategy;
+use App\Interfaces\IGanadorStrategy;
 
 class GanadorPorHabilidad implements IGanadorStrategy
 {
