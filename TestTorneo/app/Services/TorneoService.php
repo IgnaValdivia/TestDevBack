@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Interfaces\Repositories\IPartidaRepository;
+use App\Interfaces\Repositories\ITorneoRepository;
 use App\Models\Jugador;
 use App\Models\Torneo;
 use App\Models\Partida;
@@ -11,22 +13,48 @@ use Illuminate\Support\Facades\DB;
 
 class TorneoService implements ITorneoService
 {
+    private ITorneoRepository $torneoRepository;
+    private IPartidaRepository $partidaRepository;
     private IGanadorStrategy $ganadorStrategy;
 
-    public function __construct(IGanadorStrategy $ganadorStrategy)
-    {
+    public function __construct(
+        ITorneoRepository $torneoRepository,
+        IPartidaRepository $partidaRepository,
+        IGanadorStrategy $ganadorStrategy
+    ) {
+        $this->torneoRepository = $torneoRepository;
+        $this->partidaRepository = $partidaRepository;
         $this->ganadorStrategy = $ganadorStrategy;
     }
 
-    public function crearPartida(Torneo $torneo, int $jugador1, int $jugador2, int $ronda): Partida
+
+    public function crearPartida(Torneo $torneo, Jugador $jugador1, Jugador $jugador2, int $ronda): Partida
     {
-        return Partida::create([
+        return $this->partidaRepository->create([
             'torneo_id' => $torneo->id,
-            'jugador1_id' => $jugador1,
-            'jugador2_id' => $jugador2,
+            'jugador1_id' => $jugador1->id,
+            'jugador1_type' => get_class($jugador1),
+            'jugador2_id' => $jugador2->id,
+            'jugador2_type' => get_class($jugador2),
             'ronda' => $ronda
         ]);
     }
+
+    public function obtenerTorneos()
+    {
+        return $this->torneoRepository->getAll();
+    }
+
+    public function crearTorneo(array $data): Torneo
+    {
+        return $this->torneoRepository->create($data);
+    }
+
+    public function eliminarTorneo(int $id): bool
+    {
+        return $this->torneoRepository->delete($id);
+    }
+
 
     public function comenzarTorneo(int $torneoId): ?Torneo
     {
@@ -40,7 +68,7 @@ class TorneoService implements ITorneoService
             $partida->jugador2
         );
 
-        $partida->update(['ganador_id' => $ganador->id]);
+        $this->partidaRepository->update($partida->id, ['ganador_id' => $ganador->id]);
 
         return $ganador;
     }
