@@ -4,17 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-abstract class Jugador extends Model
+class Jugador extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['nombre', 'genero', 'habilidad', 'fuerza', 'velocidad', 'reaccion'];
+    protected $table = "jugadores";
 
-    public function torneos()
+    protected $fillable = ['nombre', 'genero', 'habilidad'];
+
+    public function detalle()
     {
-        return $this->belongsToMany(Torneo::class, 'torneo_jugador');
+        return $this->hasOne(JugadorMasculino::class, 'id')->orWhereHas('jugador', function ($query) {
+            $query->where('genero', 'Femenino');
+        });
     }
-
-    abstract public function calcularPuntaje(): int;
 }

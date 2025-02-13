@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jugadores_masculinos', function (Blueprint $table) {
-            $table->foreignId('id')->constrained('jugadores')->cascadeOnDelete()->primary();
+            $table->unsignedBigInteger('id')->primary();
+            $table->foreign('id')->references('id')->on('jugadores')->cascadeOnDelete();
             $table->integer('fuerza');
             $table->integer('velocidad');
             $table->timestamps();

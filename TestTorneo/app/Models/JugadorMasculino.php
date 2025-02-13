@@ -2,19 +2,25 @@
 
 namespace App\Models;
 
-class JugadorMasculino extends Jugador
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class JugadorMasculino extends Model
 {
+
+    use HasFactory;
+
     protected $table = "jugadores_masculinos";
 
     protected $fillable = ['id', 'fuerza', 'velocidad'];
 
-    public function partidas()
-    {
-        return $this->morphMany(Partida::class, 'jugador');
-    }
+    public $incrementing = false;
+    protected $keyType = 'int';
+    protected $primaryKey = 'id';
 
-    public function calcularPuntaje(): int
+
+    public function jugador()
     {
-        return $this->habilidad + $this->fuerza + $this->velocidad + rand(0, 10);
+        return $this->belongsTo(Jugador::class, 'id');
     }
 }
