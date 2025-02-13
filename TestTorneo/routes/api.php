@@ -5,7 +5,9 @@ use App\Http\Controllers\API\PartidaController;
 use App\Http\Controllers\API\TorneoController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('torneos')->group(function () {
+
+
+Route::prefix('api/torneos')->group(function () {
     Route::get('/', [TorneoController::class, 'index']);  // Obtener todos los torneos
     Route::get('{id}', [TorneoController::class, 'show']); // Obtener torneo por ID
     Route::post('/', [TorneoController::class, 'store']); // Crear torneo
@@ -14,7 +16,7 @@ Route::prefix('torneos')->group(function () {
     Route::get('{id}/partidas', [TorneoController::class, 'partidas']); // Obtener partidas de un torneo
 });
 
-Route::prefix('jugadores')->group(function () {
+Route::prefix('api/jugadores')->group(function () {
     Route::get('/', [JugadorController::class, 'index']); // Obtener todos los jugadores
     Route::get('{id}', [JugadorController::class, 'show']); // Obtener jugador por ID
     Route::post('/', [JugadorController::class, 'store']); // Crear jugador
@@ -23,7 +25,7 @@ Route::prefix('jugadores')->group(function () {
     Route::get('{id}/torneos', [JugadorController::class, 'torneos']); // Torneos en los que participa un jugador
 });
 
-Route::prefix('partidas')->group(function () {
+Route::prefix('api/partidas')->group(function () {
     Route::get('/', [PartidaController::class, 'index']); // Obtener todas las partidas
     Route::get('{id}', [PartidaController::class, 'show']); // Obtener partida por ID
     Route::post('/', [PartidaController::class, 'store']); // Crear partida
