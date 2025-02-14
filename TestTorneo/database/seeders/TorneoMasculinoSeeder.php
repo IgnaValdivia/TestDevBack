@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Interfaces\IJugadorMasculinoService;
 use App\Interfaces\Repositories\IJugadorMasculinoRepository;
 use App\Interfaces\Repositories\IPartidaRepository;
 use Illuminate\Database\Seeder;
@@ -13,13 +14,13 @@ use Illuminate\Support\Facades\DB;
 class TorneoMasculinoSeeder extends Seeder
 {
     private TorneoService $torneoService;
-    private IJugadorMasculinoRepository $jugadorRepository;
+    private IJugadorMasculinoService $jugadorService;
     private IPartidaRepository $partidaRepository;
 
-    public function __construct(TorneoService $torneoService, IJugadorMasculinoRepository $jugadorRepository, IPartidaRepository $partidaRepository)
+    public function __construct(TorneoService $torneoService, IJugadorMasculinoService $jugadorService, IPartidaRepository $partidaRepository)
     {
         $this->torneoService = $torneoService;
-        $this->jugadorRepository = $jugadorRepository;
+        $this->jugadorService = $jugadorService;
         $this->partidaRepository = $partidaRepository;
     }
 
@@ -39,7 +40,7 @@ class TorneoMasculinoSeeder extends Seeder
             //Crear jugadores masculinos
             $jugadores = collect();
             for ($i = 1; $i <= 8; $i++) { // 8 jugadores
-                $jugador = $this->jugadorRepository->create([
+                $jugador = $this->jugadorService->create([
                     'nombre' => "JugadorM$i",
                     'dni' => rand(10000000, 99999999),
                     'habilidad' => rand(50, 100),

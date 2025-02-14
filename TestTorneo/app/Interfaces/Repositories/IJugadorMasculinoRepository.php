@@ -2,12 +2,14 @@
 
 namespace App\Interfaces\Repositories;
 
-use App\DTOs\JugadorMasculinoDTO;
+use App\Models\Jugador;
+use App\Models\JugadorMasculino;
+use Illuminate\Database\Eloquent\Collection;
 
 interface IJugadorMasculinoRepository
 {
-    public function getAll(): array;
-    public function findById(int $id): ?JugadorMasculinoDTO;
-    public function create(array $data): JugadorMasculinoDTO;
+    public function getAll(): Collection;
+    public function findById(int $id): ?JugadorMasculino;
+    public function create(Jugador $jugador, array $data): JugadorMasculino;
     public function update(int $id, array $data): bool;
 }

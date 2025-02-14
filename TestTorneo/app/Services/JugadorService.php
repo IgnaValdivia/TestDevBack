@@ -7,7 +7,6 @@ use App\Interfaces\IJugadorService;
 use App\Interfaces\Repositories\IJugadorRepository;
 use App\Models\JugadorFemenino;
 use App\Models\JugadorMasculino;
-use App\Repositories\JugadorRepository;
 use Exception;
 use InvalidArgumentException;
 

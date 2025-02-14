@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Interfaces\IGanadorStrategy;
+use App\Interfaces\IJugadorMasculinoService;
 use App\Interfaces\IJugadorService;
 use App\Interfaces\Repositories\IJugadorFemeninoRepository;
 use App\Interfaces\Repositories\IJugadorMasculinoRepository;
@@ -14,6 +15,7 @@ use App\Repositories\JugadorMasculinoRepository;
 use App\Repositories\JugadorRepository;
 use App\Repositories\PartidaRepository;
 use App\Repositories\TorneoRepository;
+use App\Services\JugadorMasculinoService;
 use App\Services\JugadorService;
 use App\Services\TorneoService;
 use App\Strategies\GanadorPorHabilidad;
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(IJugadorFemeninoRepository::class, JugadorFemeninoRepository::class);
         $this->app->bind(IJugadorRepository::class, JugadorRepository::class);
         $this->app->bind(IJugadorService::class, JugadorService::class);
+        $this->app->bind(IJugadorMasculinoService::class, JugadorMasculinoService::class);
         $this->app->bind(TorneoService::class, function ($app) {
             return new TorneoService(
                 $app->make(ITorneoRepository::class),
