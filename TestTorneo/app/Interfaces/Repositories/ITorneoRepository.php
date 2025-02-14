@@ -11,4 +11,6 @@ interface ITorneoRepository
     public function create(array $data): Torneo;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;
+    public function restore(int $id): bool;
+    public function findByIdWithTrashed(int $id): ?Torneo;
 }

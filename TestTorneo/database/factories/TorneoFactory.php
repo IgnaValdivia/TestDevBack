@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Jugador;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,6 +21,7 @@ class TorneoFactory extends Factory
             'nombre' => $this->faker->sentence(3),
             'tipo' => $this->faker->randomElement(['Masculino', 'Femenino']),
             'fecha' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'ganador_id' => Jugador::factory()->create(['genero' => 'Masculino'])->id,
         ];
     }
 }

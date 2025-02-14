@@ -29,10 +29,12 @@ class JugadorMasculinoRepository implements IJugadorMasculinoRepository
         return JugadorMasculinoDTO::fromModel($jugadorMasculino);
     }
 
+
     public function create($data): JugadorMasculinoDTO
     {
         $jugador = Jugador::create([
             'nombre' => $data['nombre'],
+            'dni' => $data['dni'],
             'genero' => 'Masculino',
             'habilidad' => $data['habilidad'],
         ]);
@@ -59,6 +61,7 @@ class JugadorMasculinoRepository implements IJugadorMasculinoRepository
         // Actualizar datos en Jugador
         $jugadorMasculino->jugador->update([
             'nombre' => $data['nombre'] ?? $jugadorMasculino->jugador->nombre,
+            'dni' => $data['dni'] ?? $jugadorMasculino->jugador->dni,
             'habilidad' => $data['habilidad'] ?? $jugadorMasculino->jugador->habilidad,
         ]);
 
@@ -67,16 +70,5 @@ class JugadorMasculinoRepository implements IJugadorMasculinoRepository
             'fuerza' => $data['fuerza'] ?? $jugadorMasculino->fuerza,
             'velocidad' => $data['velocidad'] ?? $jugadorMasculino->velocidad,
         ]);
-    }
-
-    public function delete(int $id): bool
-    {
-        $jugador = Jugador::find($id);
-
-        if (!$jugador) {
-            return false; // Si no existe, retorna false
-        }
-
-        return $jugador->delete(); // Baja lógica
     }
 }

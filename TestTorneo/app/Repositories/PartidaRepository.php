@@ -31,4 +31,9 @@ class PartidaRepository implements IPartidaRepository
     {
         return Partida::destroy($id);
     }
+
+    public function deleteByTorneoId(int $torneoId): bool
+    {
+        return Partida::where('torneo_id', $torneoId)->delete();
+    }
 }

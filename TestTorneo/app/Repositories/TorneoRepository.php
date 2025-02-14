@@ -29,6 +29,16 @@ class TorneoRepository implements ITorneoRepository
 
     public function delete(int $id): bool
     {
-        return Torneo::destroy($id);
+        return Torneo::where('id', $id)->delete();
+    }
+
+    public function restore(int $id): bool
+    {
+        return Torneo::where('id', $id)->restore();
+    }
+
+    public function findByIdWithTrashed(int $id): ?Torneo
+    {
+        return Torneo::withTrashed()->find($id);
     }
 }

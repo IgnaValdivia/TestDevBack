@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jugadores', function (Blueprint $table) {
-            $table->softDeletes();
             $table->id();
             $table->string('nombre');
             $table->enum('genero', ['Masculino', 'Femenino']);
+            $table->string('dni')->unique();
             $table->integer('habilidad');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

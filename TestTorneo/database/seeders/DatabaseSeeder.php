@@ -17,18 +17,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        /*$this->call([
-            JugadorSeeder::class,
-        ]);*/
 
-        /*$this->call([
+        $this->call([
             TorneoMasculinoSeeder::class,
-            TorneoFemeninoSeeder::class,
-        ]);*/
+            //TorneoFemeninoSeeder::class,
+        ]);
 
-        JugadorFemenino::factory(10)->create();
+        /*JugadorFemenino::factory(10)->create();
         JugadorMasculino::factory(10)->create();
         Partida::factory(10)->create();
-        Torneo::factory(10)->create();
+        Torneo::factory(10)->create();*/
     }
 }

@@ -8,6 +8,7 @@ class JugadorMasculinoDTO
 {
     public int $id;
     public string $nombre;
+    public string $dni;
     public string $genero;
     public int $habilidad;
     public int $fuerza;
@@ -19,6 +20,7 @@ class JugadorMasculinoDTO
     {
         $this->id = $jugadorMasculino->id;
         $this->nombre = $jugadorMasculino->jugador->nombre;
+        $this->dni = $jugadorMasculino->jugador->dni;
         $this->genero = $jugadorMasculino->jugador->genero;
         $this->habilidad = $jugadorMasculino->jugador->habilidad;
         $this->fuerza = $jugadorMasculino->fuerza;

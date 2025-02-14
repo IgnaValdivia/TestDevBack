@@ -12,12 +12,25 @@ class Jugador extends Model
 
     protected $table = "jugadores";
 
-    protected $fillable = ['nombre', 'genero', 'habilidad'];
+    protected $fillable = ['nombre', 'dni', 'genero', 'habilidad'];
 
+    //Relación con JugadorMasculino
+    public function jugadorMasculino()
+    {
+        return $this->hasOne(JugadorMasculino::class, 'id');
+    }
+
+    //Relación con JugadorFemenino
+    public function jugadorFemenino()
+    {
+        return $this->hasOne(JugadorFemenino::class, 'id');
+    }
+
+    //Relación dinámica según el género del jugador
     public function detalle()
     {
-        return $this->hasOne(JugadorMasculino::class, 'id')->orWhereHas('jugador', function ($query) {
-            $query->where('genero', 'Femenino');
-        });
+        return $this->genero === 'Masculino'
+            ? $this->hasOne(JugadorMasculino::class, 'id')
+            : $this->hasOne(JugadorFemenino::class, 'id');
     }
 }

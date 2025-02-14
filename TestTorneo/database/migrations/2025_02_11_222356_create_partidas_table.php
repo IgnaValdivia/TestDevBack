@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('ganador_id')->nullable()->constrained('jugadores')->nullOnDelete();
             $table->integer('ronda');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

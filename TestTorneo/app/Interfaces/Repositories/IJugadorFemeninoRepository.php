@@ -2,13 +2,12 @@
 
 namespace App\Interfaces\Repositories;
 
-use App\Models\JugadorFemenino;
+use App\DTOs\JugadorFemeninoDTO;
 
 interface IJugadorFemeninoRepository
 {
-    public function getAll();
-    public function findById(int $id): ?JugadorFemenino;
-    public function create(array $data): JugadorFemenino;
+    public function getAll(): array;
+    public function findById(int $id): ?JugadorFemeninoDTO;
+    public function create(array $data): JugadorFemeninoDTO;
     public function update(int $id, array $data): bool;
-    public function delete(int $id): bool;
 }

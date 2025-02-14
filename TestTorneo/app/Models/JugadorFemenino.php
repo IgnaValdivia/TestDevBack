@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Interfaces\IJugador;
+use App\Interfaces\IPuntajeStrategy;
+use App\Services\JugadorService;
+use App\Strategies\PuntajeFemenino;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -21,18 +25,5 @@ class JugadorFemenino extends Model
     public function jugador()
     {
         return $this->belongsTo(Jugador::class, 'id');
-    }
-
-    public function toArray()
-    {
-        return [
-            'id' => $this->id,
-            'nombre' => $this->jugador->nombre,
-            'genero' => $this->jugador->genero,
-            'habilidad' => $this->jugador->habilidad,
-            'reaccion' => $this->reaccion,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
     }
 }

@@ -11,4 +11,5 @@ interface IPartidaRepository
     public function create(array $data): Partida;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;
+    public function deleteByTorneoId(int $torneoId): bool;
 }

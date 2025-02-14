@@ -2,45 +2,72 @@
 
 namespace App\Repositories;
 
+use App\DTOs\JugadorFemeninoDTO;
 use App\Interfaces\Repositories\IJugadorFemeninoRepository;
+use App\Models\Jugador;
 use App\Models\JugadorFemenino;
 use Illuminate\Support\Facades\DB;
 
 class JugadorFemeninoRepository implements IJugadorFemeninoRepository
 {
-    public function getAll()
+    public function getAll(): array
     {
-        return JugadorFemenino::all();
+        return JugadorFemenino::whereHas('jugador') //Solo incluye si el jugador existe y no está eliminado
+            ->with('jugador') // Cargar la relación
+            ->get()
+            ->map(fn($jugadorFemenino) => JugadorFemeninoDTO::fromModel($jugadorFemenino))
+            ->toArray();
     }
 
-    public function findById(int $id): ?JugadorFemenino
+    public function findById(int $id): ?JugadorFemeninoDTO
     {
-        return JugadorFemenino::find($id);
+        $jugadorFemenino = JugadorFemenino::with('jugador')->find($id);
+
+        if (!$jugadorFemenino) {
+            return null;
+        }
+
+        return JugadorFemeninoDTO::fromModel($jugadorFemenino);
     }
 
-    public function create(array $data): JugadorFemenino
+
+    public function create($data): JugadorFemeninoDTO
     {
-        $jugadorId = DB::table('jugadores')->insertGetId([
+        $jugador = Jugador::create([
             'nombre' => $data['nombre'],
-            'genero' => 'Femenino',
+            'dni' => $data['dni'],
+            'genero' => 'Masculino',
             'habilidad' => $data['habilidad'],
-            'created_at' => now(),
-            'updated_at' => now()
         ]);
 
-        return JugadorFemenino::create([
-            'id' => $jugadorId,
-            'reaccion' => $data['reaccion']
+        JugadorFemenino::create([
+            'id' => $jugador->id,
+            'reaccion' => $data['reaccion'],
         ]);
+
+
+        return $this->findById($jugador->id);
     }
 
     public function update(int $id, array $data): bool
     {
-        return JugadorFemenino::where('id', $id)->update($data);
-    }
+        // Buscar el jugador masculino con su relación
+        $jugadorFemenino = JugadorFemenino::with('jugador')->find($id);
 
-    public function delete(int $id): bool
-    {
-        return JugadorFemenino::destroy($id);
+        if (!$jugadorFemenino) {
+            return false; // Si no existe, retornamos false
+        }
+
+        // Actualizar datos en Jugador
+        $jugadorFemenino->jugador->update([
+            'nombre' => $data['nombre'] ?? $jugadorFemenino->jugador->nombre,
+            'dni' => $data['dni'] ?? $jugadorFemenino->jugador->dni,
+            'habilidad' => $data['habilidad'] ?? $jugadorFemenino->jugador->habilidad,
+        ]);
+
+        // Actualizar datos en JugadorFemenino
+        return $jugadorFemenino->update([
+            'reaccion' => $data['reaccion'] ?? $jugadorFemenino->reaccion,
+        ]);
     }
 }
