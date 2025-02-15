@@ -7,6 +7,8 @@ use App\Models\Jugador;
 
 interface IJugadorRepository
 {
+    public function create(array $data): Jugador;
+    public function update(int $id, array $data): bool;
     public function findById(int $id): ?Jugador;
     public function findByIdWithTrashed(int $id): ?Jugador;
     public function findByDni(string $dni): ?Jugador;

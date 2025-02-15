@@ -3,11 +3,8 @@
 namespace Database\Seeders;
 
 use App\Interfaces\IJugadorMasculinoService;
-use App\Interfaces\Repositories\IJugadorMasculinoRepository;
 use App\Interfaces\Repositories\IPartidaRepository;
 use Illuminate\Database\Seeder;
-use App\Repositories\JugadorMasculinoRepository;
-use App\Repositories\PartidaRepository;
 use App\Services\TorneoService;
 use Illuminate\Support\Facades\DB;
 
@@ -43,9 +40,9 @@ class TorneoMasculinoSeeder extends Seeder
                 $jugador = $this->jugadorService->create([
                     'nombre' => "JugadorM$i",
                     'dni' => rand(10000000, 99999999),
-                    'habilidad' => rand(50, 100),
-                    'fuerza' => rand(50, 100),
-                    'velocidad' => rand(50, 100)
+                    'habilidad' => rand(0, 100),
+                    'fuerza' => rand(0, 100),
+                    'velocidad' => rand(0, 100)
                 ]);
                 $jugadores->push($jugador);
             }

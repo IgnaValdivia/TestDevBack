@@ -20,7 +20,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             TorneoMasculinoSeeder::class,
-            //TorneoFemeninoSeeder::class,
+            TorneoFemeninoSeeder::class,
+            TorneoMasculinoSeeder::class,
+            TorneoFemeninoSeeder::class,
         ]);
 
         /*JugadorFemenino::factory(10)->create();

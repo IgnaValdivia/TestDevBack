@@ -7,6 +7,17 @@ use App\Models\Jugador;
 
 class JugadorRepository implements IJugadorRepository
 {
+
+    public function create(array $data): Jugador
+    {
+        return Jugador::create($data);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        return Jugador::where('id', $id)->update($data);
+    }
+
     public function findById(int $id): ?Jugador
     {
         return Jugador::find($id);

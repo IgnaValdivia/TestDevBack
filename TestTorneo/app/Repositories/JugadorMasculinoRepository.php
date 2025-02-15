@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\DTOs\JugadorMasculinoDTO;
 use App\Interfaces\Repositories\IJugadorMasculinoRepository;
 use App\Models\Jugador;
 use App\Models\JugadorMasculino;
