@@ -11,6 +11,7 @@ use App\Interfaces\ITorneoService;
 use App\Interfaces\IGanadorStrategy;
 use App\Interfaces\IJugadorService;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TorneoService implements ITorneoService
@@ -34,10 +35,36 @@ class TorneoService implements ITorneoService
         return $this->torneoRepository->getAll();
     }
 
+    public function findById(int $id): ?Torneo
+    {
+        $torneo = $this->torneoRepository->findById($id);
+
+        if (!$torneo) {
+            throw new Exception("Torneo no encontrado");
+        }
+
+        return $torneo;
+    }
+
     public function create(array $data): Torneo
     {
         //VALIDAR
         return $this->torneoRepository->create($data);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $torneo = $this->torneoRepository->findById($id);
+
+        if (!$torneo) {
+            throw new Exception("Jugador no encontrado");
+        }
+
+        return $this->torneoRepository->update($id, [
+            'nombre' => $data['nombre'] ?? $torneo->nombre,
+            'tipo' => $data['tipo'] ?? $torneo->tipo,
+            'fecha' => $data['fecha'] ?? $torneo->fecha,
+        ]);
     }
 
     public function delete(int $id): bool
@@ -87,5 +114,30 @@ class TorneoService implements ITorneoService
 
         // Actualizamos el torneo con el ganador
         return $this->torneoRepository->update($torneoId, ['ganador_id' => $ganadorId]);
+    }
+
+    public function getPartidas(int $id): Collection
+    {
+        return $this->torneoRepository->getPartidas($id);
+    }
+
+    public function asignarJugadores(int $id, array $jugadores): bool
+    {
+        return $this->torneoRepository->asignarJugadores($id, $jugadores);
+    }
+
+    public function comenzarTorneo(int $id): bool
+    {
+        return $this->torneoRepository->comenzarTorneo($id);
+    }
+
+    public function getEstado(int $id): ?string
+    {
+        return $this->torneoRepository->getEstado($id);
+    }
+
+    public function getPartidasPorRonda(int $id, int $ronda): Collection
+    {
+        return $this->torneoRepository->getPartidasPorRonda($id, $ronda);
     }
 }

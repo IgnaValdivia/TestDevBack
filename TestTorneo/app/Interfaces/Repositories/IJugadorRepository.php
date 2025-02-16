@@ -4,6 +4,7 @@ namespace App\Interfaces\Repositories;
 
 use App\DTOs\JugadorDTO;
 use App\Models\Jugador;
+use Illuminate\Database\Eloquent\Collection;
 
 interface IJugadorRepository
 {
@@ -14,4 +15,6 @@ interface IJugadorRepository
     public function findByDni(string $dni): ?Jugador;
     public function delete(int $id): bool;
     public function restore(int $id): bool;
+    public function getTorneos(int $id,  bool $soloGanados): Collection;
+    public function getPartidas(int $id): Collection;
 }

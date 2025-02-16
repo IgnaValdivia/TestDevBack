@@ -14,22 +14,23 @@ Route::prefix('api/torneos')->group(function () {
     Route::put('{id}', [TorneoController::class, 'update']); // Actualizar torneo
     Route::delete('{id}', [TorneoController::class, 'destroy']); // Eliminar torneo
     Route::get('{id}/partidas', [TorneoController::class, 'partidas']); // Obtener partidas de un torneo
+    Route::post('{id}/asignar-jugadores', [TorneoController::class, 'asignarJugadores']); //asignar jugadores a torneo
+    Route::post('{id}/comenzar', [TorneoController::class, 'comenzarTorneo']); //comenzar un torneo
+    Route::get('{id}/estado', [TorneoController::class, 'estadoTorneo']); //obtener estado de un torneo
+    Route::get('{id}/ronda/{ronda}', [TorneoController::class, 'partidasPorRonda']); //obtener partidas de cierta ronda de un torneo
 });
 
 Route::prefix('api/jugadores')->group(function () {
     Route::get('/', [JugadorController::class, 'index']); // Obtener todos los jugadores
     Route::get('{id}', [JugadorController::class, 'show']); // Obtener jugador por ID
+    Route::get('{dni}', [JugadorController::class, 'showByDni']); // Obtener jugador por DNI
     Route::post('/', [JugadorController::class, 'store']); // Crear jugador
     Route::put('{id}', [JugadorController::class, 'update']); // Actualizar jugador
     Route::delete('{id}', [JugadorController::class, 'destroy']); // Eliminar jugador
-    Route::get('{id}/torneos', [JugadorController::class, 'torneos']); // Torneos en los que participa un jugador
+    Route::get('{id}/torneos', [JugadorController::class, 'torneos']); // Torneos en los que participa un jugador (filtros generales - ganados)
+    Route::get('{id}/partidas', [JugadorController::class, 'partidas']); //obtener las partidas jugadas del jugador (filtros ganadas - perdidas)
 });
 
 Route::prefix('api/partidas')->group(function () {
-    Route::get('/', [PartidaController::class, 'index']); // Obtener todas las partidas
     Route::get('{id}', [PartidaController::class, 'show']); // Obtener partida por ID
-    Route::post('/', [PartidaController::class, 'store']); // Crear partida
-    Route::put('{id}', [PartidaController::class, 'update']); // Actualizar partida
-    Route::delete('{id}', [PartidaController::class, 'destroy']); // Eliminar partida
-    Route::post('{id}/determinar-ganador', [PartidaController::class, 'determinarGanador']); // Determinar ganador
 });

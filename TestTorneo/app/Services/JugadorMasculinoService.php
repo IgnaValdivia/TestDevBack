@@ -59,25 +59,9 @@ class JugadorMasculinoService implements IJugadorMasculinoService
 
     public function update(int $id, array $data): bool
     {
-        return DB::transaction(function () use ($id, $data) {
-            $jugadorMasculino = $this->jugadorRepository->findById($id);
-
-            if (!$jugadorMasculino) {
-                throw new Exception("Jugador no encontrado");
-            }
-
-            // Actualizar los datos en `jugadores`
-            $this->jugadorRepository->update($id, [
-                'nombre' => $data['nombre'] ?? $jugadorMasculino->jugador->nombre,
-                'dni' => $data['dni'] ?? $jugadorMasculino->jugador->dni,
-                'habilidad' => $data['habilidad'] ?? $jugadorMasculino->jugador->habilidad,
-            ]);
-
-            // Actualizar los datos en `jugadores_masculinos`
-            return $this->jugadorMasculinoRepository->update($id, [
-                'fuerza' => $data['fuerza'] ?? $jugadorMasculino->fuerza,
-                'velocidad' => $data['velocidad'] ?? $jugadorMasculino->velocidad,
-            ]);
-        });
+        return $this->jugadorMasculinoRepository->update($id, [
+            'fuerza' => $data['fuerza'],
+            'velocidad' => $data['velocidad'],
+        ]);
     }
 }

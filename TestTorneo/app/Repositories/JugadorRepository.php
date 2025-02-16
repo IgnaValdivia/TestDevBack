@@ -4,6 +4,9 @@ namespace App\Repositories;
 
 use App\Interfaces\Repositories\IJugadorRepository;
 use App\Models\Jugador;
+use App\Models\Partida;
+use App\Models\Torneo;
+use Illuminate\Database\Eloquent\Collection;
 
 class JugadorRepository implements IJugadorRepository
 {
@@ -43,5 +46,25 @@ class JugadorRepository implements IJugadorRepository
     public function restore(int $id): bool
     {
         return Jugador::withTrashed()->where('id', $id)->restore();
+    }
+
+    //Revisar query
+    public function getTorneos(int $id, bool $soloGanados): Collection
+    {
+        return Torneo::whereHas('jugadores', function ($query) use ($id) {
+            $query->where('jugadores.id', $id);
+        })
+            ->when($soloGanados, function ($query) use ($id) {
+                $query->where('ganador_id', $id);
+            })
+            ->get();
+    }
+
+
+    public function getPartidas(int $id): Collection
+    {
+        return Partida::where('jugador1_id', $id)
+            ->orWhere('jugador2_id', $id)
+            ->get();
     }
 }
