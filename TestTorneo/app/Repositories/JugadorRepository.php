@@ -48,16 +48,11 @@ class JugadorRepository implements IJugadorRepository
         return Jugador::withTrashed()->where('id', $id)->restore();
     }
 
-    //Revisar query
-    public function getTorneos(int $id, bool $soloGanados): Collection
+    public function getTorneos(int $id): Collection
     {
         return Torneo::whereHas('jugadores', function ($query) use ($id) {
             $query->where('jugadores.id', $id);
-        })
-            ->when($soloGanados, function ($query) use ($id) {
-                $query->where('ganador_id', $id);
-            })
-            ->get();
+        })->get();
     }
 
 

@@ -10,7 +10,7 @@ class Torneo extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['nombre', 'tipo', 'fecha', 'ganador_id'];
+    protected $fillable = ['nombre', 'tipo', 'fecha', 'estado', 'ganador_id'];
 
     public function partidas()
     {

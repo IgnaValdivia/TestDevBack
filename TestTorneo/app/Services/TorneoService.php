@@ -49,6 +49,7 @@ class TorneoService implements ITorneoService
     public function create(array $data): Torneo
     {
         //VALIDAR
+        $data['estado'] = 'Pendiente';
         return $this->torneoRepository->create($data);
     }
 
@@ -113,7 +114,7 @@ class TorneoService implements ITorneoService
         }
 
         // Actualizamos el torneo con el ganador
-        return $this->torneoRepository->update($torneoId, ['ganador_id' => $ganadorId]);
+        return $this->torneoRepository->update($torneoId, ['ganador_id' => $ganadorId, 'estado' => 'Finalizado']);
     }
 
     public function getPartidas(int $id): Collection
@@ -123,12 +124,20 @@ class TorneoService implements ITorneoService
 
     public function asignarJugadores(int $id, array $jugadores): bool
     {
-        return $this->torneoRepository->asignarJugadores($id, $jugadores);
+        $torneo = $this->torneoRepository->findById($id);
+
+        if (!$torneo) {
+            return false;
+        }
+
+        $this->torneoRepository->asignarJugadores($id, $jugadores);
+        return true;
     }
 
     public function comenzarTorneo(int $id): bool
     {
-        return $this->torneoRepository->comenzarTorneo($id);
+        //logica de torneo
+        return true;
     }
 
     public function getEstado(int $id): ?string

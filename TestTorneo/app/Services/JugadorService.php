@@ -150,7 +150,11 @@ class JugadorService implements IJugadorService
 
     public function getTorneos(int $id, bool $soloGanados): array
     {
-        $torneos = $this->jugadorRepository->getTorneos($id, $soloGanados);
+        $torneos = $this->jugadorRepository->getTorneos($id);
+
+        if ($soloGanados) {
+            $torneos = $torneos->where('ganador_id', $id);
+        }
 
         return $torneos->map(fn($torneo) => [
             'id' => $torneo->id,

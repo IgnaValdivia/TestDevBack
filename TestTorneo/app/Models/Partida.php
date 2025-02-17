@@ -11,7 +11,7 @@ class Partida extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['jugador1_id', 'jugador2_id', 'ganador_id', 'ronda', 'torneo_id'];
+    protected $fillable = ['jugador1_id',  'jugador1_type', 'jugador2_id', 'jugador2_type', 'ganador_id', 'ronda', 'torneo_id'];
 
     public function jugador1()
     {

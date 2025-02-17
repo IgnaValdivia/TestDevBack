@@ -2,10 +2,12 @@
 
 namespace Tests\Unit;
 
+use Tests\TestCase;
+use App\Models\Jugador;
 use App\Models\JugadorMasculino;
 use App\Repositories\JugadorMasculinoRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class JugadorMasculinoRepositoryTest extends TestCase
 {
@@ -19,34 +21,25 @@ class JugadorMasculinoRepositoryTest extends TestCase
         $this->jugadorMasculinoRepository = new JugadorMasculinoRepository();
     }
 
-    /*public function test_puede_crear_jugador_masculino()
+    #[Test]
+    public function puede_crear_un_jugador_masculino()
     {
         $data = [
-            'nombre' => 'Jugador Test Masculino',
-            'genero' => 'Masculino',
-            'habilidad' => 80,
+            'id' => Jugador::factory()->create(['genero' => 'Masculino'])->id,
             'fuerza' => 90,
             'velocidad' => 75
         ];
 
-        $jugador = $this->jugadorMasculinoRepository->create($data);
+        $jugadorMasculino = $this->jugadorMasculinoRepository->create($data);
 
-        $this->assertDatabaseHas('jugadores', ['id' => $jugador->id, 'genero' => 'Masculino']);
-        $this->assertDatabaseHas('jugadores_masculinos', ['id' => $jugador->id]);
+        $this->assertInstanceOf(JugadorMasculino::class, $jugadorMasculino);
+        $this->assertDatabaseHas('jugadores_masculinos', $data);
     }
 
-    public function test_puede_obtener_jugador_masculino_por_id()
+    #[Test]
+    public function puede_obtener_todos_los_jugadores_masculinos()
     {
-        $jugador = JugadorMasculino::factory()->create();
-
-        $jugadorEncontrado = $this->jugadorMasculinoRepository->findById($jugador->id);
-
-        $this->assertNotNull($jugadorEncontrado);
-        $this->assertEquals($jugador->id, $jugadorEncontrado->id);
-    }
-
-    public function test_puede_listar_todos_los_jugadores_masculinos()
-    {
+        Jugador::factory()->count(3)->create(['genero' => 'Masculino']);
         JugadorMasculino::factory()->count(3)->create();
 
         $jugadores = $this->jugadorMasculinoRepository->getAll();
@@ -54,24 +47,33 @@ class JugadorMasculinoRepositoryTest extends TestCase
         $this->assertCount(3, $jugadores);
     }
 
-    public function test_puede_actualizar_jugador_masculino()
+    #[Test]
+    public function puede_buscar_un_jugador_masculino_por_id()
     {
-        $jugador = JugadorMasculino::factory()->create();
+        $jugadorBase = Jugador::factory()->create(['genero' => 'Masculino']);
+        $jugadorMasculino = JugadorMasculino::factory()->create(['id' => $jugadorBase->id]);
 
-        $actualizado = $this->jugadorMasculinoRepository->update($jugador->id, ['fuerza' => 99]);
+        $encontrado = $this->jugadorMasculinoRepository->findById($jugadorMasculino->id);
 
-        $this->assertTrue($actualizado);
-        $this->assertDatabaseHas('jugadores_masculinos', ['id' => $jugador->id, 'fuerza' => 99]);
+        $this->assertNotNull($encontrado);
+        $this->assertEquals($jugadorMasculino->id, $encontrado->id);
     }
 
-    public function test_puede_eliminar_jugador_masculino()
+    #[Test]
+    public function puede_actualizar_un_jugador_masculino()
     {
-        $jugador = JugadorMasculino::factory()->create();
+        $jugadorBase = Jugador::factory()->create(['genero' => 'Masculino']);
+        $jugadorMasculino = JugadorMasculino::factory()->create(['id' => $jugadorBase->id]);
 
-        $eliminado = $this->jugadorMasculinoRepository->delete($jugador->id);
+        $nuevosDatos = ['fuerza' => 95, 'velocidad' => 80];
 
-        $this->assertTrue($eliminado);
-        $this->assertDatabaseMissing('jugadores', ['id' => $jugador->id]);
-        $this->assertDatabaseMissing('jugadores_masculinos', ['id' => $jugador->id]);
-    }*/
+        $actualizado = $this->jugadorMasculinoRepository->update($jugadorMasculino->id, $nuevosDatos);
+
+        $this->assertTrue($actualizado);
+        $this->assertDatabaseHas('jugadores_masculinos', [
+            'id' => $jugadorMasculino->id,
+            'fuerza' => 95,
+            'velocidad' => 80
+        ]);
+    }
 }

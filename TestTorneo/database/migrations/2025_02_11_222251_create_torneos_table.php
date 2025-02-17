@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->enum('tipo', ['Masculino', 'Femenino']);
+            $table->enum('estado', ['Finalizado', 'Pendiente']);
             $table->foreignId('ganador_id')->nullable()->constrained('jugadores')->nullOnDelete();
             $table->date('fecha')->nullable();
             $table->timestamps();

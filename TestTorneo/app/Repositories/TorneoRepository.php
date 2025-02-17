@@ -49,31 +49,14 @@ class TorneoRepository implements ITorneoRepository
         return Partida::where('torneo_id', $torneoId)->get();
     }
 
-    public function asignarJugadores(int $torneoId, array $jugadores): bool
+    public function asignarJugadores(int $torneoId, array $jugadores): void
     {
-        $torneo = Torneo::find($torneoId);
-        if (!$torneo) {
-            return false;
-        }
-
-        $torneo->jugadores()->syncWithoutDetaching($jugadores);
-        return true;
-    }
-
-    public function comenzarTorneo(int $torneoId): bool
-    {
-        $torneo = Torneo::find($torneoId);
-        if (!$torneo || $torneo->estado !== 'pendiente') {
-            return false;
-        }
-
-        return $torneo->update(['estado' => 'en curso']);
+        Torneo::find($torneoId)?->jugadores()->syncWithoutDetaching($jugadores);
     }
 
     public function getEstado(int $torneoId): ?string
     {
-        $torneo = Torneo::find($torneoId);
-        return $torneo ? $torneo->estado : null;
+        return Torneo::where('id', $torneoId)->value('estado');
     }
 
     public function getPartidasPorRonda(int $torneoId, int $ronda): Collection

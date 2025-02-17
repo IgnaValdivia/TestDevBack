@@ -15,8 +15,7 @@ interface ITorneoRepository
     public function restore(int $id): bool;
     public function findByIdWithTrashed(int $id): ?Torneo;
     public function getPartidas(int $torneoId): Collection;
-    public function asignarJugadores(int $torneoId, array $jugadores): bool;
-    public function comenzarTorneo(int $torneoId): bool;
+    public function asignarJugadores(int $torneoId, array $jugadores): void;
     public function getEstado(int $torneoId): ?string;
     public function getPartidasPorRonda(int $torneoId, int $ronda): Collection;
 }

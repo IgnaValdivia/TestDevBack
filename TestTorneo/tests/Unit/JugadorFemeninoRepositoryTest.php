@@ -2,15 +2,16 @@
 
 namespace Tests\Unit;
 
+use Tests\TestCase;
+use App\Models\Jugador;
 use App\Models\JugadorFemenino;
 use App\Repositories\JugadorFemeninoRepository;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class JugadorFemeninoRepositoryTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private JugadorFemeninoRepository $jugadorFemeninoRepository;
 
@@ -20,60 +21,59 @@ class JugadorFemeninoRepositoryTest extends TestCase
         $this->jugadorFemeninoRepository = new JugadorFemeninoRepository();
     }
 
-    /*public function test_puede_crear_jugador_femenino()
+    #[Test]
+    public function puede_crear_un_jugador_femenino()
     {
+
+        // Crear el jugador femenino
         $data = [
-            'nombre' => 'Jugador Test Femenino',
-            'genero' => 'Femenino',
-            'habilidad' => 85,
-            'reaccion' => 92
+            'id' => Jugador::factory()->create(['genero' => 'Femenino'])->id,
+            'reaccion' => 85
         ];
 
-        DB::beginTransaction();
-        $jugador = $this->jugadorFemeninoRepository->create($data);
-        DB::commit();
+        $jugadorFemenino = $this->jugadorFemeninoRepository->create($data);
 
-        $this->assertDatabaseHas('jugadores', ['id' => $jugador->id, 'genero' => 'Femenino']);
-        $this->assertDatabaseHas('jugadores_femeninos', ['id' => $jugador->id]);
+        $this->assertInstanceOf(JugadorFemenino::class, $jugadorFemenino);
+        $this->assertDatabaseHas('jugadores_femeninos', $data);
     }
 
-    public function test_puede_obtener_jugador_femenino_por_id()
+    #[Test]
+    public function puede_obtener_todos_los_jugadores_femeninos()
     {
-        $jugador = JugadorFemenino::factory()->create();
-
-        $jugadorEncontrado = $this->jugadorFemeninoRepository->findById($jugador->id);
-
-        $this->assertNotNull($jugadorEncontrado);
-        $this->assertEquals($jugador->id, $jugadorEncontrado->id);
-    }
-
-    public function test_puede_listar_todos_los_jugadores_femeninos()
-    {
-        JugadorFemenino::factory()->count(4)->create();
+        Jugador::factory()->count(3)->create(['genero' => 'Femenino']);
+        JugadorFemenino::factory()->count(3)->create();
 
         $jugadores = $this->jugadorFemeninoRepository->getAll();
 
-        $this->assertCount(4, $jugadores);
+        $this->assertCount(3, $jugadores);
     }
 
-    public function test_puede_actualizar_jugador_femenino()
+    #[Test]
+    public function puede_buscar_un_jugador_femenino_por_id()
     {
-        $jugador = JugadorFemenino::factory()->create();
+        $jugadorBase = Jugador::factory()->create(['genero' => 'Femenino']);
+        $jugadorFemenino = JugadorFemenino::factory()->create(['id' => $jugadorBase->id]);
 
-        $actualizado = $this->jugadorFemeninoRepository->update($jugador->id, ['reaccion' => 98]);
+        $encontrado = $this->jugadorFemeninoRepository->findById($jugadorFemenino->id);
+
+        $this->assertNotNull($encontrado);
+        $this->assertEquals($jugadorFemenino->id, $encontrado->id);
+    }
+
+    #[Test]
+    public function puede_actualizar_un_jugador_femenino()
+    {
+        $jugadorBase = Jugador::factory()->create(['genero' => 'Femenino']);
+        $jugadorFemenino = JugadorFemenino::factory()->create(['id' => $jugadorBase->id]);
+
+        $nuevosDatos = ['reaccion' => 95];
+
+        $actualizado = $this->jugadorFemeninoRepository->update($jugadorFemenino->id, $nuevosDatos);
 
         $this->assertTrue($actualizado);
-        $this->assertDatabaseHas('jugadores_femeninos', ['id' => $jugador->id, 'reaccion' => 98]);
+        $this->assertDatabaseHas('jugadores_femeninos', [
+            'id' => $jugadorFemenino->id,
+            'reaccion' => 95
+        ]);
     }
-
-    public function test_puede_eliminar_jugador_femenino()
-    {
-        $jugador = JugadorFemenino::factory()->create();
-
-        $eliminado = $this->jugadorFemeninoRepository->delete($jugador->id);
-
-        $this->assertTrue($eliminado);
-        $this->assertDatabaseMissing('jugadores', ['id' => $jugador->id]);
-        $this->assertDatabaseMissing('jugadores_femeninos', ['id' => $jugador->id]);
-    }*/
 }

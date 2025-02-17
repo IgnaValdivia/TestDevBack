@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Interfaces\Repositories\IJugadorFemeninoRepository;
-use App\Models\Jugador;
 use App\Models\JugadorFemenino;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -22,12 +21,9 @@ class JugadorFemeninoRepository implements IJugadorFemeninoRepository
     }
 
 
-    public function create(Jugador $jugador, array $data): JugadorFemenino
+    public function create(array $data): JugadorFemenino
     {
-        return JugadorFemenino::create([
-            'id' => $jugador->id,
-            'reaccion' => $data['reaccion'],
-        ]);
+        return JugadorFemenino::create($data);
     }
 
     public function update(int $id, array $data): bool

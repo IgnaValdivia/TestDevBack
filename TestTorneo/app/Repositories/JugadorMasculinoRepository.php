@@ -22,13 +22,9 @@ class JugadorMasculinoRepository implements IJugadorMasculinoRepository
     }
 
 
-    public function create(Jugador $jugador, array $data): JugadorMasculino
+    public function create(array $data): JugadorMasculino
     {
-        return JugadorMasculino::create([
-            'id' => $jugador->id,
-            'fuerza' => $data['fuerza'],
-            'velocidad' => $data['velocidad']
-        ]);
+        return JugadorMasculino::create($data);
     }
 
     public function update(int $id, array $data): bool

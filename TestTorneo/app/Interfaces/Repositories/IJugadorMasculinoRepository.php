@@ -10,6 +10,6 @@ interface IJugadorMasculinoRepository
 {
     public function getAll(): Collection;
     public function findById(int $id): ?JugadorMasculino;
-    public function create(Jugador $jugador, array $data): JugadorMasculino;
+    public function create(array $data): JugadorMasculino;
     public function update(int $id, array $data): bool;
 }

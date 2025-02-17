@@ -2,10 +2,14 @@
 
 namespace Tests\Unit;
 
+use App\Models\Jugador;
+use App\Models\JugadorMasculino;
+use Tests\TestCase;
 use App\Models\Partida;
+use App\Models\Torneo;
 use App\Repositories\PartidaRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class PartidaRepositoryTest extends TestCase
 {
@@ -19,19 +23,74 @@ class PartidaRepositoryTest extends TestCase
         $this->partidaRepository = new PartidaRepository();
     }
 
-    public function test_puede_crear_partida()
+    #[Test]
+    public function puede_crear_una_partida()
     {
-        $partida = Partida::factory()->create();
+        $torneo = Torneo::factory()->create();
+
+        $partida = $this->partidaRepository->create([
+            'torneo_id' => $torneo->id,
+            'jugador1_id' => 1,
+            'jugador1_type' => 'App\Models\JugadorMasculino',
+            'jugador2_id' => 2,
+            'jugador2_type' => 'App\Models\JugadorMasculino',
+            'ronda' => 1,
+        ]);
 
         $this->assertDatabaseHas('partidas', ['id' => $partida->id]);
     }
 
-    public function test_puede_obtener_todas_las_partidas()
+    #[Test]
+    public function puede_obtener_todas_las_partidas()
     {
-        Partida::factory()->count(3)->create();
-
+        Partida::factory()->count(5)->create();
         $partidas = $this->partidaRepository->getAll();
 
-        $this->assertCount(3, $partidas);
+        $this->assertCount(5, $partidas);
+    }
+
+    #[Test]
+    public function puede_buscar_partida_por_id()
+    {
+        $partida = Partida::factory()->create();
+        $encontrada = $this->partidaRepository->findById($partida->id);
+
+        $this->assertNotNull($encontrada);
+        $this->assertEquals($partida->id, $encontrada->id);
+    }
+
+    #[Test]
+    public function puede_actualizar_una_partida()
+    {
+        $partida = Partida::factory()->create();
+        $actualizada = $this->partidaRepository->update($partida->id, ['ronda' => 2]);
+
+        $this->assertTrue($actualizada);
+        $this->assertDatabaseHas('partidas', ['id' => $partida->id, 'ronda' => 2]);
+    }
+
+    #[Test]
+    public function puede_eliminar_una_partida()
+    {
+        $partida = Partida::factory()->create();
+        $eliminada = $this->partidaRepository->delete($partida->id);
+
+        $this->assertTrue($eliminada);
+        $this->assertDatabaseHas('partidas', ['id' => $partida->id]);
+
+        //Verificar que está marcado como eliminado (SoftDeletes)
+        $this->assertNotNull(Partida::withTrashed()->find($partida->id)->deleted_at);
+    }
+
+    #[Test]
+    public function puede_eliminar_partidas_por_torneo()
+    {
+        $torneo = Torneo::factory()->create();
+        Partida::factory()->count(3)->create(['torneo_id' => $torneo->id]);
+
+        $eliminadas = $this->partidaRepository->deleteByTorneoId($torneo->id);
+
+        $this->assertTrue($eliminadas);
+        $this->assertDatabaseHas('partidas', ['torneo_id' => $torneo->id]);
     }
 }

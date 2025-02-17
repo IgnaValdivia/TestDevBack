@@ -17,11 +17,13 @@ class TorneoFactory extends Factory
      */
     public function definition(): array
     {
+        $genero = $this->faker->randomElement(['Masculino', 'Femenino']);
         return [
             'nombre' => $this->faker->sentence(3),
-            'tipo' => $this->faker->randomElement(['Masculino', 'Femenino']),
+            'tipo' => $genero,
+            'estado' => 'Pendiente',
             'fecha' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'ganador_id' => Jugador::factory()->create(['genero' => 'Masculino'])->id,
+            'ganador_id' => null,
         ];
     }
 }
