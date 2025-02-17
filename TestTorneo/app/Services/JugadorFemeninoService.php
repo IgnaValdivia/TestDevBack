@@ -41,6 +41,7 @@ class JugadorFemeninoService implements IJugadorFemeninoService
     public function create($data): JugadorFemeninoDTO
     {
         return DB::transaction(function () use ($data) {
+
             // Crear jugador base en `jugadores`
             $jugador = $this->jugadorRepository->create([
                 'nombre' => $data['nombre'],

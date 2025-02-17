@@ -1,0 +1,762 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de Torneos",
+        "description": "Documentación de la API para gestionar torneos, jugadores y partidas.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Servidor Local"
+        }
+    ],
+    "paths": {
+        "/api/jugadores": {
+            "get": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Listar todos los jugadores",
+                "description": "Permite listar todos los jugadores, opcionalmente filtrando por género.",
+                "operationId": "dea173c276f606c29f946190cd3fbf0d",
+                "parameters": [
+                    {
+                        "name": "genero",
+                        "in": "query",
+                        "description": "Filtrar por género (Masculino, Femenino, Todos)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de jugadores"
+                    },
+                    "500": {
+                        "description": "Error en el servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Crear un nuevo jugador",
+                "description": "Registra un nuevo jugador con sus atributos.",
+                "operationId": "a6bca232b4957d71a1179acf4eba7097",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "dni",
+                                    "genero",
+                                    "habilidad"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "dni": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "genero": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculino",
+                                            "Femenino"
+                                        ]
+                                    },
+                                    "habilidad": {
+                                        "type": "integer",
+                                        "example": 85
+                                    },
+                                    "fuerza": {
+                                        "type": "integer",
+                                        "example": 80,
+                                        "nullable": true
+                                    },
+                                    "velocidad": {
+                                        "type": "integer",
+                                        "example": 90,
+                                        "nullable": true
+                                    },
+                                    "reaccion": {
+                                        "type": "integer",
+                                        "example": 70,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Jugador creado exitosamente"
+                    },
+                    "400": {
+                        "description": "Error en la validación"
+                    },
+                    "500": {
+                        "description": "Error en el servidor"
+                    }
+                }
+            }
+        },
+        "/api/jugadores/{id}": {
+            "get": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Obtener un jugador por ID",
+                "description": "Busca un jugador en base a su ID único.",
+                "operationId": "38a1e42cd09832fbd502015f2a56d7d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del jugador",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jugador encontrado"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Actualizar un jugador",
+                "description": "Permite modificar la información de un jugador ya existente.",
+                "operationId": "43b9b9ac5454068b7a7befe507c8e46f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del jugador a actualizar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "dni": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "habilidad": {
+                                        "type": "integer",
+                                        "example": 85
+                                    },
+                                    "fuerza": {
+                                        "type": "integer",
+                                        "example": 80,
+                                        "nullable": true
+                                    },
+                                    "velocidad": {
+                                        "type": "integer",
+                                        "example": 90,
+                                        "nullable": true
+                                    },
+                                    "reaccion": {
+                                        "type": "integer",
+                                        "example": 70,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Jugador actualizado correctamente"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Eliminar un jugador",
+                "description": "Realiza la eliminación lógica de un jugador por ID.",
+                "operationId": "ad3b63cc99eed2fea1490aca50426404",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del jugador a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jugador eliminado correctamente"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/jugadores/{dni}": {
+            "get": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Obtener un jugador por DNI",
+                "description": "Busca un jugador por su DNI único.",
+                "operationId": "fe88f5b3598c55962614f71d92a40dd4",
+                "parameters": [
+                    {
+                        "name": "dni",
+                        "in": "path",
+                        "description": "DNI del jugador",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Jugador encontrado"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/jugadores/{id}/torneos": {
+            "get": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Obtener torneos en los que participa un jugador",
+                "description": "Obtiene la lista de torneos en los que ha participado un jugador. Se puede filtrar por torneos ganados.",
+                "operationId": "86a5d25e083d1d67e5972819fee65a3c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del jugador",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ganados",
+                        "in": "query",
+                        "description": "Filtrar solo torneos ganados (true, false, todos)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de torneos del jugador"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado o sin torneos"
+                    }
+                }
+            }
+        },
+        "/api/jugadores/{id}/partidas": {
+            "get": {
+                "tags": [
+                    "Jugadores"
+                ],
+                "summary": "Obtener partidas en las que participa un jugador",
+                "description": "Obtiene la lista de partidas en las que ha jugado un jugador, filtrando por ganadas, perdidas o todas.",
+                "operationId": "9ab67c6248df5653c361a61540ac38f7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del jugador",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "filtro",
+                        "in": "query",
+                        "description": "Filtrar por tipo de partida (ganadas, perdidas, todas)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de partidas del jugador"
+                    },
+                    "404": {
+                        "description": "Jugador no encontrado o sin partidas"
+                    }
+                }
+            }
+        },
+        "/api/partidas/{id}": {
+            "get": {
+                "tags": [
+                    "Partidas"
+                ],
+                "summary": "Obtener detalles de una partida",
+                "description": "Devuelve información de una partida específica por ID",
+                "operationId": "4ee5dd1cb07cd4bddb79f18bd7c5a905",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la partida",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la partida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "torneo_id": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "jugador1_id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "jugador2_id": {
+                                            "type": "integer",
+                                            "example": 20
+                                        },
+                                        "ganador_id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "ronda": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Partida no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Partida no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/torneos": {
+            "get": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Listar todos los torneos",
+                "operationId": "4e29c43dc52a51a9209258bf84986dde",
+                "responses": {
+                    "200": {
+                        "description": "Lista de torneos"
+                    },
+                    "500": {
+                        "description": "Error en el servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Crear un nuevo torneo",
+                "operationId": "ce5996daacaeeb4bbe3406485338c5f7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "tipo",
+                                    "fecha"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "example": "Torneo Nacional"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculino",
+                                            "Femenino"
+                                        ],
+                                        "example": "Masculino"
+                                    },
+                                    "fecha": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-03-01"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Torneo creado"
+                    },
+                    "400": {
+                        "description": "Datos inválidos"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}": {
+            "get": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Obtener un torneo por ID",
+                "operationId": "d9f455d03020f7d1756fc201a2f5ad88",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Torneo encontrado"
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Actualizar un torneo",
+                "operationId": "efcf4386945898751d6517127e6b96e4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculino",
+                                            "Femenino"
+                                        ]
+                                    },
+                                    "fecha": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Torneo actualizado"
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Eliminar un torneo",
+                "operationId": "2fb17d30739a7af8777c590e66ef1f7d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Torneo eliminado"
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}/partidas": {
+            "get": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Obtener todas las partidas de un torneo",
+                "operationId": "edea75c92b062fd33c5a163c3984f390",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de partidas del torneo"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}/asignar-jugadores": {
+            "post": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Asignar jugadores a un torneo",
+                "operationId": "0fa41f499be45498e2fe474874d698d9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "jugadores": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Jugadores asignados correctamente"
+                    },
+                    "400": {
+                        "description": "Error al asignar jugadores"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}/comenzar": {
+            "post": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Comenzar un torneo",
+                "operationId": "ff5294ab3a96fa5951dd22c654540619",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Torneo comenzado"
+                    },
+                    "400": {
+                        "description": "No se pudo comenzar el torneo"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}/estado": {
+            "get": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Obtener el estado actual de un torneo",
+                "operationId": "5506f916aa367f6ec49106f36f105ca3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estado del torneo"
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/torneos/{id}/partidas/{ronda}": {
+            "get": {
+                "tags": [
+                    "Torneos"
+                ],
+                "summary": "Obtener partidas de una ronda específica de un torneo",
+                "operationId": "14cb71947898f0a5950e5347461961d4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "ronda",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de partidas de la ronda"
+                    },
+                    "404": {
+                        "description": "No hay partidas en esta ronda"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Jugadores",
+            "description": "Endpoints relacionados con los jugadores"
+        },
+        {
+            "name": "Partidas",
+            "description": "Endpoints para gestionar partidas"
+        },
+        {
+            "name": "Torneos",
+            "description": "Endpoints relacionados con los torneos"
+        }
+    ]
+}
