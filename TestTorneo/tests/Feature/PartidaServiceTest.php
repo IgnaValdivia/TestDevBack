@@ -32,11 +32,4 @@ class PartidaServiceTest extends TestCase
         $this->assertNotNull($partidaEncontrada);
         $this->assertEquals($partida->id, $partidaEncontrada->id);
     }
-
-    #[Test]
-    public function lanza_excepcion_si_la_partida_no_existe()
-    {
-        $this->expectException(Exception::class);
-        $this->partidaService->findById(999);
-    }
 }

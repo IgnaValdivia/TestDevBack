@@ -49,9 +49,11 @@ class JugadorFemeninoService implements IJugadorFemeninoService
                 'genero' => 'Femenino',
                 'habilidad' => $data['habilidad'],
             ]);
-            $data['id'] = $jugador->id;
 
-            $jugadorFemenino = $this->jugadorFemeninoRepository->create($data);
+            $jugadorFemenino = $this->jugadorFemeninoRepository->create([
+                'id' => $jugador->id,
+                'reaccion' => $data['reaccion']
+            ]);
 
             return JugadorFemeninoDTO::fromModel($jugadorFemenino);
         });

@@ -28,7 +28,8 @@ class TorneoRepositoryTest extends TestCase
     {
         $data = [
             'nombre' => 'Torneo Test',
-            'estado' => 'pendiente',
+            'tipo' => 'Masculino',
+            'estado' => 'Pendiente',
             'fecha' => now(),
         ];
 

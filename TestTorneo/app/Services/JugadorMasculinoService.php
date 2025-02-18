@@ -49,9 +49,12 @@ class JugadorMasculinoService implements IJugadorMasculinoService
                 'habilidad' => $data['habilidad'],
             ]);
 
-            $data['id'] = $jugador->id;
 
-            $jugadorMasculino = $this->jugadorMasculinoRepository->create($data);
+            $jugadorMasculino = $this->jugadorMasculinoRepository->create([
+                'id' => $jugador->id,
+                'velocidad' => $data['velocidad'],
+                'fuerza' => $data['fuerza'],
+            ]);
 
             // Retornar un DTO con los datos completos
             return JugadorMasculinoDTO::fromModel($jugadorMasculino);

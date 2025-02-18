@@ -19,12 +19,6 @@ class PartidaService implements IPartidaService
 
     public function findById(int $id): ?Partida
     {
-        $partida = $this->partidaRepository->findById($id);
-
-        if (!$partida) {
-            throw new Exception("Partida no encontrada");
-        }
-
-        return $partida;
+        return $this->partidaRepository->findById($id);
     }
 }
