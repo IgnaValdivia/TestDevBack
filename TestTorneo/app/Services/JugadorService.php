@@ -15,6 +15,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class JugadorService implements IJugadorService
 {
@@ -46,7 +47,7 @@ class JugadorService implements IJugadorService
         $jugador = $this->jugadorRepository->findById($id);
 
         if (!$jugador) {
-            throw new Exception("Jugador no encontrado");
+            return null;
         }
 
         return JugadorDTO::fromModel($jugador);
@@ -78,17 +79,12 @@ class JugadorService implements IJugadorService
         }
     }
 
-    public function update(int $id, array $data): bool
+    public function update(JugadorDTO $jugador, array $data): bool
     {
-        return DB::transaction(function () use ($id, $data) {
-            $jugador = $this->jugadorRepository->findById($id);
-
-            if (!$jugador) {
-                throw new Exception("Jugador no encontrado");
-            }
+        return DB::transaction(function () use ($jugador, $data) {
 
             // Actualizar los datos en `jugadores`
-            $this->jugadorRepository->update($id, [
+            $this->jugadorRepository->update($jugador->id, [
                 'nombre' => $data['nombre'] ?? $jugador->nombre,
                 'dni' => $data['dni'] ?? $jugador->dni,
                 'habilidad' => $data['habilidad'] ?? $jugador->habilidad,
@@ -97,13 +93,13 @@ class JugadorService implements IJugadorService
 
             if ($jugador->genero === 'Masculino') {
                 // Actualizar los datos en `jugadores_masculinos`
-                return $this->jugadorMasculinoService->update($id, [
+                return $this->jugadorMasculinoService->update($jugador->id, [
                     'fuerza' => $data['fuerza'] ?? $jugador->fuerza,
                     'velocidad' => $data['velocidad'] ?? $jugador->velocidad,
                 ]);
             } else {
                 // Actualizar los datos en `jugadores_femenino`
-                return $this->jugadorFemeninoService->update($id, [
+                return $this->jugadorFemeninoService->update($jugador->id, [
                     'reaccion' => $data['reaccion'] ?? $jugador->reaccion,
                 ]);
             }
@@ -111,24 +107,24 @@ class JugadorService implements IJugadorService
     }
 
 
-    public function delete(int $id): bool
+    public function delete(int $id): ?bool
     {
         $jugador = $this->jugadorRepository->findById($id);
 
         if (!$jugador) {
-            return false;
+            return null;
         }
 
-        return $this->jugadorRepository->delete($id);
+        return $this->jugadorRepository->delete($id) ?: false;
     }
 
 
-    public function restore(int $id): bool
+    public function restore(int $id): ?bool
     {
         $jugador = $this->jugadorRepository->findByIdWithTrashed($id);
 
         if (!$jugador) {
-            throw new Exception("Jugador no encontrado o no está eliminado.");
+            return null;
         }
 
         return $this->jugadorRepository->restore($id);
@@ -148,12 +144,25 @@ class JugadorService implements IJugadorService
         };
     }
 
-    public function getTorneos(int $id, bool $soloGanados): array
+    public function getTorneos(int $id, ?bool $soloGanados): array
     {
+        // Verificar si el jugador existe
+        $jugador = $this->jugadorRepository->findById($id);
+        if (!$jugador) {
+            throw new NotFoundHttpException("Jugador no encontrado");
+        }
+
+        // Obtener torneos del jugador
         $torneos = $this->jugadorRepository->getTorneos($id);
 
-        if ($soloGanados) {
-            $torneos = $torneos->where('ganador_id', $id);
+        // Si no tiene torneos, devolver un array vacío sin error
+        if ($torneos->isEmpty()) {
+            return [];
+        }
+
+        // Si es true, solo los que ganó | Si es false, solo los que no ganó
+        if (!is_null($soloGanados)) {
+            $torneos = $torneos->filter(fn($torneo) => ($torneo->ganador_id === $id) === $soloGanados);
         }
 
         return $torneos->map(fn($torneo) => [
@@ -165,15 +174,16 @@ class JugadorService implements IJugadorService
         ])->toArray();
     }
 
-    public function getPartidas(int $id, string $filtro): array
+    public function getPartidas(int $id, ?string $filtro): array
     {
         $partidas = $this->jugadorRepository->getPartidas($id);
 
+        // Aplica el filtro según la opción enviada
         return $partidas->filter(function ($partida) use ($id, $filtro) {
             return match ($filtro) {
                 'ganadas' => $partida->ganador_id === $id,
                 'perdidas' => $partida->ganador_id !== null && $partida->ganador_id !== $id,
-                default => true, // todas
+                default => true, // Si es null, devuelve todas las partidas
             };
         })->map(fn($partida) => [
             'id' => $partida->id,

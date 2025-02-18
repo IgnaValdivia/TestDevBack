@@ -72,23 +72,29 @@
                                         "enum": [
                                             "Masculino",
                                             "Femenino"
-                                        ]
+                                        ],
+                                        "example": "Masculino"
                                     },
                                     "habilidad": {
                                         "type": "integer",
+                                        "maximum": 100,
+                                        "minimum": 0,
                                         "example": 85
                                     },
                                     "fuerza": {
+                                        "description": "Campo obligatorio si el género es 'Masculino'. Rango: 0 - 100.",
                                         "type": "integer",
                                         "example": 80,
                                         "nullable": true
                                     },
                                     "velocidad": {
+                                        "description": "Campo obligatorio si el género es 'Masculino'. Rango: 0 - 100.",
                                         "type": "integer",
                                         "example": 90,
                                         "nullable": true
                                     },
                                     "reaccion": {
+                                        "description": "Campo obligatorio si el género es 'Femenino'. Rango: 0 - 100.",
                                         "type": "integer",
                                         "example": 70,
                                         "nullable": true
@@ -101,10 +107,83 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Jugador creado exitosamente"
+                        "description": "Jugador creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nombre": {
+                                            "type": "string",
+                                            "example": "Juan Pérez"
+                                        },
+                                        "dni": {
+                                            "type": "string",
+                                            "example": "12345678"
+                                        },
+                                        "genero": {
+                                            "type": "string",
+                                            "example": "Masculino"
+                                        },
+                                        "habilidad": {
+                                            "type": "integer",
+                                            "example": 85
+                                        },
+                                        "fuerza": {
+                                            "type": "integer",
+                                            "example": 80
+                                        },
+                                        "velocidad": {
+                                            "type": "integer",
+                                            "example": 90
+                                        },
+                                        "reaccion": {
+                                            "type": "integer",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "400": {
-                        "description": "Error en la validación"
+                    "422": {
+                        "description": "Error en la validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error en la validación"
+                                        },
+                                        "detalles": {
+                                            "properties": {
+                                                "dni": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El campo dni ya ha sido tomado."
+                                                    }
+                                                },
+                                                "genero": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El campo genero es obligatorio."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "description": "Error en el servidor"
@@ -248,19 +327,78 @@
                     {
                         "name": "dni",
                         "in": "path",
-                        "description": "DNI del jugador",
+                        "description": "DNI del jugador (debe ser un número de 7 u 8 dígitos)",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "12345678"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Jugador encontrado"
+                        "description": "Jugador encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nombre": {
+                                            "type": "string",
+                                            "example": "Juan Pérez"
+                                        },
+                                        "dni": {
+                                            "type": "string",
+                                            "example": "12345678"
+                                        },
+                                        "genero": {
+                                            "type": "string",
+                                            "example": "Masculino"
+                                        },
+                                        "habilidad": {
+                                            "type": "integer",
+                                            "example": 80
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "DNI inválido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "El DNI debe ser un número de 7 u 8 dígitos"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Jugador no encontrado"
+                        "description": "Jugador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Jugador no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }

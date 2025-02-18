@@ -7,6 +7,7 @@ use App\Services\JugadorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @OA\Tag(
@@ -51,8 +52,6 @@ class JugadorController extends Controller
     }
 
     /**
-     * Crear un nuevo jugador.
-     * 
      * @OA\Post(
      *     path="/api/jugadores",
      *     tags={"Jugadores"},
@@ -64,16 +63,72 @@ class JugadorController extends Controller
      *             required={"nombre", "dni", "genero", "habilidad"},
      *             @OA\Property(property="nombre", type="string", example="Juan Pérez"),
      *             @OA\Property(property="dni", type="string", example="12345678"),
-     *             @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino"}),
-     *             @OA\Property(property="habilidad", type="integer", example=85),
-     *             @OA\Property(property="fuerza", type="integer", example=80, nullable=true),
-     *             @OA\Property(property="velocidad", type="integer", example=90, nullable=true),
-     *             @OA\Property(property="reaccion", type="integer", example=70, nullable=true)
+     *             @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino"}, example="Masculino"),
+     *             @OA\Property(property="habilidad", type="integer", example=85, minimum=0, maximum=100),
+     *             @OA\Property(
+     *                 property="fuerza",
+     *                 type="integer",
+     *                 example=80,
+     *                 nullable=true,
+     *                 description="Campo obligatorio si el género es 'Masculino'. Rango: 0 - 100."
+     *             ),
+     *             @OA\Property(
+     *                 property="velocidad",
+     *                 type="integer",
+     *                 example=90,
+     *                 nullable=true,
+     *                 description="Campo obligatorio si el género es 'Masculino'. Rango: 0 - 100."
+     *             ),
+     *             @OA\Property(
+     *                 property="reaccion",
+     *                 type="integer",
+     *                 example=70,
+     *                 nullable=true,
+     *                 description="Campo obligatorio si el género es 'Femenino'. Rango: 0 - 100."
+     *             )
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Jugador creado exitosamente"),
-     *     @OA\Response(response=400, description="Error en la validación"),
-     *     @OA\Response(response=500, description="Error en el servidor")
+     *     @OA\Response(
+     *         response=201,
+     *         description="Jugador creado exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="nombre", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="dni", type="string", example="12345678"),
+     *             @OA\Property(property="genero", type="string", example="Masculino"),
+     *             @OA\Property(property="habilidad", type="integer", example=85),
+     *             @OA\Property(property="fuerza", type="integer", example=80),
+     *             @OA\Property(property="velocidad", type="integer", example=90),
+     *             @OA\Property(property="reaccion", type="integer", example=null),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Error en la validación",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="string", example="Error en la validación"),
+     *             @OA\Property(
+     *                 property="detalles",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="dni",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="El campo dni ya ha sido tomado.")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="genero",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="El campo genero es obligatorio.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error en el servidor"
+     *     )
      * )
      */
     public function store(Request $request): JsonResponse
@@ -83,13 +138,22 @@ class JugadorController extends Controller
             'dni' => 'required|string|unique:jugadores,dni',
             'genero' => 'required|in:Masculino,Femenino',
             'habilidad' => 'required|integer|min:0|max:100',
-            'fuerza' => $request->genero === 'Masculino' ? 'required|integer|min:0|max:100' : 'nullable',
-            'velocidad' => $request->genero === 'Masculino' ? 'required|integer|min:0|max:100' : 'nullable',
-            'reaccion' => $request->genero === 'Femenino' ? 'required|integer|min:0|max:100' : 'nullable',
         ]);
 
+        if ($data['genero'] === 'Masculino') {
+            $extra = $request->validate([
+                'fuerza' => 'required|integer|min:0|max:100',
+                'velocidad' => 'required|integer|min:0|max:100',
+            ]);
+        } elseif ($data['genero'] === 'Femenino') {
+            $extra = $request->validate([
+                'reaccion' => 'required|integer|min:0|max:100',
+            ]);
+        }
 
-        $jugador = $this->jugadorService->create($request->genero, $data);
+        $data = array_merge($data, $extra ?? []);
+
+        $jugador = $this->jugadorService->create($data['genero'], $data);
 
         return response()->json($jugador, 201);
     }
@@ -116,6 +180,7 @@ class JugadorController extends Controller
      */
     public function show(int $id): JsonResponse
     {
+
         $jugador = $this->jugadorService->findById($id);
 
         if (!$jugador) {
@@ -134,16 +199,46 @@ class JugadorController extends Controller
      *     @OA\Parameter(
      *         name="dni",
      *         in="path",
-     *         description="DNI del jugador",
+     *         description="DNI del jugador (debe ser un número de 7 u 8 dígitos)",
      *         required=true,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string", example="12345678")
      *     ),
-     *     @OA\Response(response=200, description="Jugador encontrado"),
-     *     @OA\Response(response=404, description="Jugador no encontrado")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Jugador encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="nombre", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="dni", type="string", example="12345678"),
+     *             @OA\Property(property="genero", type="string", example="Masculino"),
+     *             @OA\Property(property="habilidad", type="integer", example=80)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="DNI inválido",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="string", example="El DNI debe ser un número de 7 u 8 dígitos")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Jugador no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="string", example="Jugador no encontrado")
+     *         )
+     *     )
      * )
      */
     public function showByDni(string $dni): JsonResponse
     {
+        if (!preg_match('/^\d{7,8}$/', $dni)) {
+            return response()->json(['error' => 'El DNI debe ser un número de 7 u 8 dígitos'], 400);
+        }
+
         $jugador = $this->jugadorService->findByDni($dni);
 
         if (!$jugador) {
@@ -154,50 +249,100 @@ class JugadorController extends Controller
     }
 
     /**
-     * Actualizar un jugador.
-     * 
      * @OA\Put(
      *     path="/api/jugadores/{id}",
      *     tags={"Jugadores"},
      *     summary="Actualizar un jugador",
-     *     description="Permite modificar la información de un jugador ya existente.",
+     *     description="Actualiza los datos de un jugador. El campo 'genero' NO puede ser modificado.",
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
-     *         description="ID del jugador a actualizar",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         description="ID del jugador",
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\RequestBody(
+     *         required=true,
      *         @OA\JsonContent(
-     *             required={"nombre"},
+     *             required={},
      *             @OA\Property(property="nombre", type="string", example="Juan Pérez"),
      *             @OA\Property(property="dni", type="string", example="12345678"),
      *             @OA\Property(property="habilidad", type="integer", example=85),
-     *             @OA\Property(property="fuerza", type="integer", example=80, nullable=true),
-     *             @OA\Property(property="velocidad", type="integer", example=90, nullable=true),
-     *             @OA\Property(property="reaccion", type="integer", example=70, nullable=true)
+     *             @OA\Property(property="fuerza", type="integer", example=80, nullable=true, description="Campo obligatorio si el género es 'Masculino'."),
+     *             @OA\Property(property="velocidad", type="integer", example=90, nullable=true, description="Campo obligatorio si el género es 'Masculino'."),
+     *             @OA\Property(property="reaccion", type="integer", example=70, nullable=true, description="Campo obligatorio si el género es 'Femenino'.")
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Jugador actualizado correctamente"),
-     *     @OA\Response(response=404, description="Jugador no encontrado")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Jugador actualizado correctamente",
+     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Jugador actualizado correctamente"))
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Intento de modificar el género",
+     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="El campo género no puede ser modificado."))
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Jugador no encontrado",
+     *         @OA\JsonContent(type="object", @OA\Property(property="message", type="string", example="Jugador no encontrado"))
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Error en la validación",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="string", example="Error en la validación"),
+     *             @OA\Property(
+     *                 property="detalles",
+     *                 type="object",
+     *                 @OA\Property(property="dni", type="array", @OA\Items(type="string", example="El campo dni ya ha sido tomado."))
+     *             )
+     *         )
+     *     )
      * )
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        $jugador = $this->jugadorService->findById($id);
+
+        if (!$jugador) {
+            return response()->json(['message' => 'Jugador no encontrado'], 404);
+        }
+
+        // Si intentan cambiar el género, lanzar un error
+        if ($request->has('genero')) {
+            return response()->json([
+                'message' => 'El campo género no puede ser modificado.'
+            ], 400);
+        }
+
+        // Validación de datos generales
         $data = $request->validate([
             'nombre' => 'sometimes|string|max:255',
             'dni' => 'sometimes|string|unique:jugadores,dni,' . $id,
             'habilidad' => 'sometimes|integer|min:0|max:100',
-            'fuerza' => 'nullable|integer|min:0|max:100',
-            'velocidad' => 'nullable|integer|min:0|max:100',
-            'reaccion' => 'nullable|integer|min:0|max:100',
         ]);
 
-        $actualizado = $this->jugadorService->update($id, $data);
+        if ($jugador->genero === 'Masculino') {
+            $extra = $request->validate([
+                'fuerza' => 'sometimes|integer|min:0|max:100',
+                'velocidad' => 'sometimes|integer|min:0|max:100',
+            ]);
+        } elseif ($jugador->genero === 'Femenino') {
+            $extra = $request->validate([
+                'reaccion' => 'sometimes|integer|min:0|max:100',
+            ]);
+        }
+
+        // Unimos los datos
+        $data = array_merge($data, $extra);
+
+        $actualizado = $this->jugadorService->update($jugador, $data);
 
         if (!$actualizado) {
-            return response()->json(['message' => 'Jugador no encontrado'], 404);
+            return response()->json(['message' => 'No se pudo actualizar el jugador'], 400);
         }
 
         return response()->json(['message' => 'Jugador actualizado correctamente'], 200);
@@ -216,18 +361,41 @@ class JugadorController extends Controller
      *         in="path",
      *         description="ID del jugador a eliminar",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer", example=1)
      *     ),
-     *     @OA\Response(response=200, description="Jugador eliminado correctamente"),
-     *     @OA\Response(response=404, description="Jugador no encontrado")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Jugador eliminado correctamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Jugador eliminado correctamente")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Jugador no encontrado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Jugador no encontrado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error en la eliminación del jugador",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No se pudo eliminar el jugador")
+     *         )
+     *     )
      * )
      */
     public function destroy(string $id): JsonResponse
     {
-        $eliminado = $this->jugadorService->delete($id);
+        $resultado = $this->jugadorService->delete($id);
 
-        if (!$eliminado) {
+        if ($resultado === null) {
             return response()->json(['message' => 'Jugador no encontrado'], 404);
+        }
+
+        if ($resultado === false) {
+            return response()->json(['message' => 'No se pudo eliminar el jugador'], 500);
         }
 
         return response()->json(['message' => 'Jugador eliminado correctamente'], 200);
@@ -249,25 +417,60 @@ class JugadorController extends Controller
      *     @OA\Parameter(
      *         name="ganados",
      *         in="query",
-     *         description="Filtrar solo torneos ganados (true, false, todos)",
+     *         description="Filtrar solo torneos ganados. Puede ser 'true' (solo ganados), 'false' (solo no ganados) o no enviar el parámetro para obtener todos.",
      *         required=false,
-     *         @OA\Schema(type="boolean")
+     *         @OA\Schema(type="string", enum={"true", "false"})
      *     ),
-     *     @OA\Response(response=200, description="Lista de torneos del jugador"),
-     *     @OA\Response(response=404, description="Jugador no encontrado o sin torneos")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de torneos del jugador o mensaje si no tiene torneos",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="nombre", type="string", example="Torneo Nacional"),
+     *                         @OA\Property(property="fecha", type="string", format="date", example="2025-05-20"),
+     *                         @OA\Property(property="tipo", type="string", example="Masculino"),
+     *                         @OA\Property(property="ganador_id", type="integer", example=10, nullable=true)
+     *                     )
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="El jugador no tiene torneos")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Jugador no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Jugador no encontrado")
+     *         )
+     *     )
      * )
      */
     public function torneos(int $id, Request $request): JsonResponse
     {
-        $soloGanados = $request->query('ganados', false);
+        try {
+            $soloGanados = $request->query('ganados');
+            $soloGanados = ($soloGanados === 'true') ? true : (($soloGanados === 'false') ? false : null);
 
-        $torneos = $this->jugadorService->getTorneos($id, $soloGanados);
+            $torneos = $this->jugadorService->getTorneos($id, $soloGanados);
 
-        if (empty($torneos)) {
-            return response()->json(['message' => 'Jugador no encontrado o sin torneos'], 404);
+            // Si el jugador existe pero no tiene torneos, devolver mensaje diferente
+            if (empty($torneos)) {
+                return response()->json(['message' => 'El jugador no tiene torneos'], 200);
+            }
+
+            return response()->json($torneos, 200);
+        } catch (NotFoundHttpException $e) {
+            return response()->json(['message' => 'Jugador no encontrado'], 404);
         }
-
-        return response()->json($torneos, 200);
     }
 
     /**
@@ -275,7 +478,7 @@ class JugadorController extends Controller
      *     path="/api/jugadores/{id}/partidas",
      *     tags={"Jugadores"},
      *     summary="Obtener partidas en las que participa un jugador",
-     *     description="Obtiene la lista de partidas en las que ha jugado un jugador, filtrando por ganadas, perdidas o todas.",
+     *     description="Obtiene la lista de partidas en las que ha participado un jugador. Se puede filtrar por partidas ganadas o perdidas.",
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -286,22 +489,62 @@ class JugadorController extends Controller
      *     @OA\Parameter(
      *         name="filtro",
      *         in="query",
-     *         description="Filtrar por tipo de partida (ganadas, perdidas, todas)",
+     *         description="Filtrar por partidas ganadas ('ganadas'), perdidas ('perdidas') o todas (sin enviar el parámetro)",
      *         required=false,
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string", enum={"ganadas", "perdidas"})
      *     ),
-     *     @OA\Response(response=200, description="Lista de partidas del jugador"),
-     *     @OA\Response(response=404, description="Jugador no encontrado o sin partidas")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de partidas del jugador o mensaje si no tiene partidas",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="torneo_id", type="integer", example=5),
+     *                         @OA\Property(property="jugador1_id", type="integer", example=10),
+     *                         @OA\Property(property="jugador2_id", type="integer", example=20),
+     *                         @OA\Property(property="ganador_id", type="integer", example=10, nullable=true),
+     *                         @OA\Property(property="ronda", type="integer", example=1),
+     *                         @OA\Property(property="fecha", type="string", format="date-time", example="2025-06-15T14:30:00Z")
+     *                     )
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="El jugador no tiene partidas")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Jugador no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Jugador no encontrado")
+     *         )
+     *     )
      * )
      */
     public function partidas(Request $request, int $id): JsonResponse
     {
-        $filtro = $request->query('filtro', 'todas');
+        // Verificar si el jugador existe
+        $jugador = $this->jugadorService->findById($id);
+        if (!$jugador) {
+            return response()->json(['message' => 'Jugador no encontrado'], 404);
+        }
 
+        // Obtener el filtro (por defecto "todas" si no se envía)
+        $filtro = $request->query('filtro', null);
+
+        // Obtener partidas del jugador
         $partidas = $this->jugadorService->getPartidas($id, $filtro);
 
+        // Si el jugador existe pero no tiene partidas
         if (empty($partidas)) {
-            return response()->json(['message' => 'Jugador no encontrado o sin partidas'], 404);
+            return response()->json(['message' => 'El jugador no tiene partidas'], 200);
         }
 
         return response()->json($partidas, 200);

@@ -8,7 +8,7 @@ use App\Repositories\PartidaRepository;
 use App\Models\Partida;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Exception;
+
 
 class PartidaServiceTest extends TestCase
 {
