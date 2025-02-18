@@ -29,13 +29,47 @@ class TorneoController extends Controller
      *     path="/api/torneos",
      *     tags={"Torneos"},
      *     summary="Listar todos los torneos",
-     *     @OA\Response(response=200, description="Lista de torneos"),
-     *     @OA\Response(response=500, description="Error en el servidor")
+     *     description="Obtiene una lista de todos los torneos disponibles. Si no hay torneos, devuelve un mensaje indicando que no hay torneos disponibles.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de torneos o mensaje de que no hay torneos disponibles",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="nombre", type="string", example="Torneo de Verano"),
+     *                         @OA\Property(property="fecha", type="string", format="date", example="2025-03-15"),
+     *                         @OA\Property(property="tipo", type="string", example="Eliminación directa"),
+     *                         @OA\Property(property="ganador_id", type="integer", nullable=true, example=10)
+     *                     )
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="No hay torneos disponibles")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error en el servidor",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Error inesperado en el servidor")
+     *         )
+     *     )
      * )
      */
     public function index(): JsonResponse
     {
         $torneos = $this->torneoService->getAll();
+
+        if (empty($torneos)) {
+            return response()->json(['message' => 'No hay torneos disponibles'], 200);
+        }
+
         return response()->json($torneos, 200);
     }
 
@@ -44,6 +78,7 @@ class TorneoController extends Controller
      *     path="/api/torneos",
      *     tags={"Torneos"},
      *     summary="Crear un nuevo torneo",
+     *     description="Registra un nuevo torneo con nombre, tipo y fecha.",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -53,8 +88,42 @@ class TorneoController extends Controller
      *             @OA\Property(property="fecha", type="string", format="date", example="2025-03-01")
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Torneo creado"),
-     *     @OA\Response(response=400, description="Datos inválidos")
+     *     @OA\Response(
+     *         response=201,
+     *         description="Torneo creado exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="nombre", type="string", example="Torneo Nacional"),
+     *             @OA\Property(property="tipo", type="string", example="Masculino"),
+     *             @OA\Property(property="fecha", type="string", format="date", example="2025-03-01"),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-03-01T12:34:56Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-03-01T12:34:56Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error en la validación de datos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Los datos proporcionados no son válidos"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(property="nombre", type="array", @OA\Items(type="string", example="El nombre es obligatorio")),
+     *                 @OA\Property(property="tipo", type="array", @OA\Items(type="string", example="El tipo debe ser Masculino o Femenino")),
+     *                 @OA\Property(property="fecha", type="array", @OA\Items(type="string", example="La fecha no es válida"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno del servidor",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="error", type="string", example="Error inesperado en el servidor")
+     *         )
+     *     )
      * )
      */
     public function store(Request $request): JsonResponse
@@ -66,6 +135,7 @@ class TorneoController extends Controller
         ]);
 
         $torneo = $this->torneoService->create($data);
+
         return response()->json($torneo, 201);
     }
 
@@ -87,6 +157,7 @@ class TorneoController extends Controller
     public function show(int $id): JsonResponse
     {
         $torneo = $this->torneoService->findById($id);
+
         return $torneo
             ? response()->json($torneo, 200)
             : response()->json(['message' => 'Torneo no encontrado'], 404);
@@ -120,6 +191,8 @@ class TorneoController extends Controller
         $data = $request->validate([
             'nombre' => 'sometimes|string|max:255',
             'tipo' => 'sometimes|in:Masculino,Femenino',
+            'estado' => 'sometimes|in:Finalizado,Pendiente',
+            'ganador_id' => 'sometimes|integer',
             'fecha' => 'sometimes|date',
         ]);
 
@@ -157,13 +230,57 @@ class TorneoController extends Controller
      *     path="/api/torneos/{id}/partidas",
      *     tags={"Torneos"},
      *     summary="Obtener todas las partidas de un torneo",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Lista de partidas del torneo")
+     *     description="Devuelve la lista de partidas de un torneo específico.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID del torneo",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de partidas del torneo",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=101),
+     *                 @OA\Property(property="torneo_id", type="integer", example=1),
+     *                 @OA\Property(property="jugador1_id", type="integer", example=10),
+     *                 @OA\Property(property="jugador2_id", type="integer", example=20),
+     *                 @OA\Property(property="ganador_id", type="integer", example=10, nullable=true),
+     *                 @OA\Property(property="ronda", type="integer", example=1),
+     *                 @OA\Property(property="fecha", type="string", format="date-time", example="2025-03-01T12:34:56Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Torneo no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Torneo con id 1 no encontrado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="No hay partidas disponibles para el torneo",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="No hay partidas disponibles para el torneo con id: 1")
+     *         )
+     *     )
      * )
      */
     public function partidas(int $id): JsonResponse
     {
         $partidas = $this->torneoService->getPartidas($id);
+
+        if (empty($partidas)) {
+            return response()->json(['message' => 'No hay partidas disponibles para el torneo con id: ' . $id], 200);
+        }
+
         return response()->json($partidas, 200);
     }
 
@@ -228,7 +345,10 @@ class TorneoController extends Controller
     public function estadoTorneo(int $id): JsonResponse
     {
         $estado = $this->torneoService->getEstado($id);
-        return response()->json(['estado' => $estado], 200);
+
+        return $estado
+            ? response()->json(['estado' => $estado], 200)
+            : response()->json(['message' => 'Torneo no encontrado'], 404);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DTOs\PartidaDTO;
+use App\DTOs\TorneoDTO;
 use App\Interfaces\Repositories\IPartidaRepository;
 use App\Interfaces\Repositories\ITorneoRepository;
 use App\Models\Torneo;
@@ -27,26 +29,28 @@ class TorneoService implements ITorneoService
         $this->jugadorService = $jugadorService;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
-        return $this->torneoRepository->getAll();
+        return $this->torneoRepository->getAll()->map(fn($torneo) => TorneoDTO::fromModel($torneo))
+            ->toArray();
     }
 
-    public function findById(int $id): ?Torneo
+    public function findById(int $id): ?TorneoDTO
     {
         $torneo = $this->torneoRepository->findById($id);
 
         if (!$torneo) {
-            throw new Exception("Torneo no encontrado");
+            return null;
         }
 
-        return $torneo;
+        return TorneoDTO::fromModel($torneo);
     }
 
-    public function create(array $data): Torneo
+    public function create(array $data): TorneoDTO
     {
         $data['estado'] = 'Pendiente';
-        return $this->torneoRepository->create($data);
+        $torneo = $this->torneoRepository->create($data);
+        return TorneoDTO::fromModel($torneo);
     }
 
     public function update(int $id, array $data): bool
@@ -113,9 +117,10 @@ class TorneoService implements ITorneoService
         return $this->torneoRepository->update($torneoId, ['ganador_id' => $ganadorId, 'estado' => 'Finalizado']);
     }
 
-    public function getPartidas(int $id): Collection
+    public function getPartidas(int $id): array
     {
-        return $this->torneoRepository->getPartidas($id);
+        return $this->torneoRepository->getPartidas($id)->map(fn($partida) => PartidaDTO::fromModel($partida))
+            ->toArray();;
     }
 
     public function asignarJugadores(int $id, array $jugadores): bool
