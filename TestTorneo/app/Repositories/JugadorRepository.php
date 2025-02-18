@@ -26,6 +26,11 @@ class JugadorRepository implements IJugadorRepository
         return Jugador::find($id);
     }
 
+    public function findByIds(array $ids): Collection
+    {
+        return Jugador::whereIn('id', $ids)->get();
+    }
+
     public function findByDni(string $dni): ?Jugador
     {
         return Jugador::with(['jugadorMasculino', 'jugadorFemenino'])

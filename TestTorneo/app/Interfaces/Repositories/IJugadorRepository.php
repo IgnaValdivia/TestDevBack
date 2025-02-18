@@ -11,6 +11,7 @@ interface IJugadorRepository
     public function create(array $data): Jugador;
     public function update(int $id, array $data): bool;
     public function findById(int $id): ?Jugador;
+    public function findByIds(array $ids): Collection;
     public function findByIdWithTrashed(int $id): ?Jugador;
     public function findByDni(string $dni): ?Jugador;
     public function delete(int $id): bool;

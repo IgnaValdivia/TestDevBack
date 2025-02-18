@@ -224,26 +224,26 @@
                     "Jugadores"
                 ],
                 "summary": "Actualizar un jugador",
-                "description": "Permite modificar la información de un jugador ya existente.",
+                "description": "Actualiza los datos de un jugador. El campo 'genero' NO puede ser modificado.",
                 "operationId": "43b9b9ac5454068b7a7befe507c8e46f",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID del jugador a actualizar",
+                        "description": "ID del jugador",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "nombre"
-                                ],
+                                "required": [],
                                 "properties": {
                                     "nombre": {
                                         "type": "string",
@@ -258,16 +258,19 @@
                                         "example": 85
                                     },
                                     "fuerza": {
+                                        "description": "Campo obligatorio si el género es 'Masculino'.",
                                         "type": "integer",
                                         "example": 80,
                                         "nullable": true
                                     },
                                     "velocidad": {
+                                        "description": "Campo obligatorio si el género es 'Masculino'.",
                                         "type": "integer",
                                         "example": 90,
                                         "nullable": true
                                     },
                                     "reaccion": {
+                                        "description": "Campo obligatorio si el género es 'Femenino'.",
                                         "type": "integer",
                                         "example": 70,
                                         "nullable": true
@@ -280,10 +283,80 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Jugador actualizado correctamente"
+                        "description": "Jugador actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador actualizado correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Intento de modificar el género",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El campo género no puede ser modificado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Jugador no encontrado"
+                        "description": "Jugador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error en la validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error en la validación"
+                                        },
+                                        "detalles": {
+                                            "properties": {
+                                                "dni": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El campo dni ya ha sido tomado."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -301,16 +374,59 @@
                         "description": "ID del jugador a eliminar",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Jugador eliminado correctamente"
+                        "description": "Jugador eliminado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador eliminado correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Jugador no encontrado"
+                        "description": "Jugador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error en la eliminación del jugador",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se pudo eliminar el jugador"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -424,19 +540,83 @@
                     {
                         "name": "ganados",
                         "in": "query",
-                        "description": "Filtrar solo torneos ganados (true, false, todos)",
+                        "description": "Filtrar solo torneos ganados. Puede ser 'true' (solo ganados), 'false' (solo no ganados) o no enviar el parámetro para obtener todos.",
                         "required": false,
                         "schema": {
-                            "type": "boolean"
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false"
+                            ]
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de torneos del jugador"
+                        "description": "Lista de torneos del jugador o mensaje si no tiene torneos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Torneo Nacional"
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-05-20"
+                                                    },
+                                                    "tipo": {
+                                                        "type": "string",
+                                                        "example": "Masculino"
+                                                    },
+                                                    "ganador_id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "El jugador no tiene torneos"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Jugador no encontrado o sin torneos"
+                        "description": "Jugador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -447,7 +627,7 @@
                     "Jugadores"
                 ],
                 "summary": "Obtener partidas en las que participa un jugador",
-                "description": "Obtiene la lista de partidas en las que ha jugado un jugador, filtrando por ganadas, perdidas o todas.",
+                "description": "Obtiene la lista de partidas en las que ha participado un jugador. Se puede filtrar por partidas ganadas o perdidas.",
                 "operationId": "9ab67c6248df5653c361a61540ac38f7",
                 "parameters": [
                     {
@@ -462,19 +642,91 @@
                     {
                         "name": "filtro",
                         "in": "query",
-                        "description": "Filtrar por tipo de partida (ganadas, perdidas, todas)",
+                        "description": "Filtrar por partidas ganadas ('ganadas'), perdidas ('perdidas') o todas (sin enviar el parámetro)",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "ganadas",
+                                "perdidas"
+                            ]
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de partidas del jugador"
+                        "description": "Lista de partidas del jugador o mensaje si no tiene partidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "torneo_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "jugador1_id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "jugador2_id": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    },
+                                                    "ganador_id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "nullable": true
+                                                    },
+                                                    "ronda": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-06-15T14:30:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "El jugador no tiene partidas"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Jugador no encontrado o sin partidas"
+                        "description": "Jugador no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugador no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -561,13 +813,74 @@
                     "Torneos"
                 ],
                 "summary": "Listar todos los torneos",
+                "description": "Obtiene una lista de todos los torneos disponibles. Si no hay torneos, devuelve un mensaje indicando que no hay torneos disponibles.",
                 "operationId": "4e29c43dc52a51a9209258bf84986dde",
                 "responses": {
                     "200": {
-                        "description": "Lista de torneos"
+                        "description": "Lista de torneos o mensaje de que no hay torneos disponibles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Torneo de Verano"
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-03-15"
+                                                    },
+                                                    "tipo": {
+                                                        "type": "string",
+                                                        "example": "Eliminación directa"
+                                                    },
+                                                    "ganador_id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No hay torneos disponibles"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "500": {
-                        "description": "Error en el servidor"
+                        "description": "Error en el servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error inesperado en el servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -576,6 +889,7 @@
                     "Torneos"
                 ],
                 "summary": "Crear un nuevo torneo",
+                "description": "Registra un nuevo torneo con nombre, tipo y fecha.",
                 "operationId": "ce5996daacaeeb4bbe3406485338c5f7",
                 "requestBody": {
                     "required": true,
@@ -613,10 +927,101 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Torneo creado"
+                        "description": "Torneo creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nombre": {
+                                            "type": "string",
+                                            "example": "Torneo Nacional"
+                                        },
+                                        "tipo": {
+                                            "type": "string",
+                                            "example": "Masculino"
+                                        },
+                                        "fecha": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-03-01"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-03-01T12:34:56Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-03-01T12:34:56Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "400": {
-                        "description": "Datos inválidos"
+                        "description": "Error en la validación de datos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Los datos proporcionados no son válidos"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "nombre": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El nombre es obligatorio"
+                                                    }
+                                                },
+                                                "tipo": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El tipo debe ser Masculino o Femenino"
+                                                    }
+                                                },
+                                                "fecha": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "La fecha no es válida"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Error inesperado en el servidor"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -730,20 +1135,94 @@
                     "Torneos"
                 ],
                 "summary": "Obtener todas las partidas de un torneo",
+                "description": "Devuelve la lista de partidas de un torneo específico.",
                 "operationId": "edea75c92b062fd33c5a163c3984f390",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID del torneo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de partidas del torneo"
+                        "description": "Lista de partidas del torneo o mensaje si no hay partidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "torneo_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "jugador1_id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "jugador2_id": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    },
+                                                    "ganador_id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "nullable": true
+                                                    },
+                                                    "ronda": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-03-01T12:34:56Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No hay partidas disponibles para el torneo con id: 1"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo con id 1 no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -853,31 +1332,104 @@
                     "Torneos"
                 ],
                 "summary": "Obtener partidas de una ronda específica de un torneo",
+                "description": "Devuelve la lista de partidas de una ronda específica dentro de un torneo.",
                 "operationId": "14cb71947898f0a5950e5347461961d4",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID del torneo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     },
                     {
                         "name": "ronda",
                         "in": "path",
+                        "description": "Número de la ronda",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 2
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de partidas de la ronda"
+                        "description": "Lista de partidas de la ronda o mensaje si no hay partidas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 101
+                                                    },
+                                                    "torneo_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "jugador1_id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "jugador2_id": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    },
+                                                    "ganador_id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "nullable": true
+                                                    },
+                                                    "ronda": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "fecha": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-03-01T12:34:56Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No hay partidas disponibles para la ronda 2 en el torneo con id 1"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "No hay partidas en esta ronda"
+                        "description": "Torneo no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo con id 1 no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }

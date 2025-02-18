@@ -12,6 +12,7 @@ use App\Interfaces\Repositories\IJugadorRepository;
 use App\Models\JugadorFemenino;
 use App\Models\JugadorMasculino;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
@@ -51,6 +52,11 @@ class JugadorService implements IJugadorService
         }
 
         return JugadorDTO::fromModel($jugador);
+    }
+
+    public function findByIds(array $ids): ?Collection
+    {
+        return $this->jugadorRepository->findByIds($ids);
     }
 
     public function findByDni(string $dni): ?JugadorDTO

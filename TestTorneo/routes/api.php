@@ -15,10 +15,11 @@ Route::middleware('api')->group(function () {
         Route::delete('{id}', [TorneoController::class, 'destroy'])->middleware('validate.id'); // Eliminar torneo //TESTED
         Route::get('{id}/partidas', [TorneoController::class, 'partidas'])->middleware('validate.id'); // Obtener partidas de un torneo //TESTED
         Route::get('{id}/estado', [TorneoController::class, 'estadoTorneo'])->middleware('validate.id'); // Obtener estado de un torneo //TESTED
+        Route::get('{id}/ronda/{ronda}', [TorneoController::class, 'partidasPorRonda'])->middleware('validate.id'); // Obtener partidas de cierta ronda de un torneo //TESTED
+        Route::post('{id}/asignar-jugadores', [TorneoController::class, 'asignarJugadores']); //asignar jugadores a torneo //TESTED
 
-        Route::post('{id}/asignar-jugadores', [TorneoController::class, 'asignarJugadores']); //asignar jugadores a torneo
         Route::post('{id}/comenzar', [TorneoController::class, 'comenzarTorneo']); //comenzar un torneo
-        Route::get('{id}/ronda/{ronda}', [TorneoController::class, 'partidasPorRonda']); // Obtener partidas de cierta ronda de un torneo
+
     });
 
     Route::prefix('jugadores')->group(function () {
@@ -28,8 +29,8 @@ Route::middleware('api')->group(function () {
         Route::post('/', [JugadorController::class, 'store']); // Crear jugador //TESTED
         Route::put('{id}', [JugadorController::class, 'update'])->middleware('validate.id'); // Actualizar jugador //TESTED
         Route::delete('{id}', [JugadorController::class, 'destroy'])->middleware('validate.id'); // Eliminar jugador //TESTED
-        Route::get('{id}/torneos', [JugadorController::class, 'torneos']); // Torneos en los que participa un jugador (filtros generales - ganadas - perdidas) //TESTED
-        Route::get('{id}/partidas', [JugadorController::class, 'partidas']); // Obtener las partidas jugadas del jugador (filtros ganadas - perdidas) //TESTED
+        Route::get('{id}/torneos', [JugadorController::class, 'torneos'])->middleware('validate.id'); // Torneos en los que participa un jugador (filtros generales - ganadas - perdidas) //TESTED
+        Route::get('{id}/partidas', [JugadorController::class, 'partidas'])->middleware('validate.id'); // Obtener las partidas jugadas del jugador (filtros ganadas - perdidas) //TESTED
     });
 
     Route::prefix('partidas')->group(function () {

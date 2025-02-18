@@ -123,16 +123,39 @@ class TorneoService implements ITorneoService
             ->toArray();;
     }
 
-    public function asignarJugadores(int $id, array $jugadores): bool
+    public function asignarJugadores(int $id, array $jugadores): array|string|bool|null
     {
         $torneo = $this->torneoRepository->findById($id);
 
         if (!$torneo) {
-            return false;
+            return null; // Torneo no encontrado
+        }
+
+        // Obtener los jugadores existentes en la BD
+        $jugadoresValidos = $this->jugadorService->findByIds($jugadores);
+
+        // Obtener los jugadores que no existen comparando los IDs enviados con los encontrados en la BD
+        $jugadoresNoExistentes = array_diff($jugadores, $jugadoresValidos->pluck('id')->toArray());
+
+        if (!empty($jugadoresNoExistentes)) {
+            return ['error' => 'no_existe', 'jugadores' => array_values($jugadoresNoExistentes)];
+        }
+
+        // Validar que todos los jugadores sean del mismo género que el torneo
+        $jugadoresGeneroIncorrecto = [];
+
+        foreach ($jugadoresValidos as $jugador) {
+            if ($jugador->genero !== $torneo->tipo) {
+                $jugadoresGeneroIncorrecto[] = $jugador->id;
+            }
+        }
+
+        if (!empty($jugadoresGeneroIncorrecto)) {
+            return ['error' => 'genero_invalido', 'jugadores' => $jugadoresGeneroIncorrecto];
         }
 
         $this->torneoRepository->asignarJugadores($id, $jugadores);
-        return true;
+        return true; // Asignación exitosa
     }
 
     public function comenzarTorneo(int $id): bool
@@ -146,8 +169,9 @@ class TorneoService implements ITorneoService
         return $this->torneoRepository->getEstado($id);
     }
 
-    public function getPartidasPorRonda(int $id, int $ronda): Collection
+    public function getPartidasPorRonda(int $id, int $ronda): array
     {
-        return $this->torneoRepository->getPartidasPorRonda($id, $ronda);
+        return $this->torneoRepository->getPartidasPorRonda($id, $ronda)->map(fn($partida) => PartidaDTO::fromModel($partida))
+            ->toArray();
     }
 }

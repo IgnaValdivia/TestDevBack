@@ -5,10 +5,12 @@ namespace App\Interfaces;
 use App\DTOs\JugadorDTO;
 use App\Models\JugadorFemenino;
 use App\Models\JugadorMasculino;
+use Illuminate\Database\Eloquent\Collection;
 
 interface IJugadorService
 {
     public function findByDni(string $dni): ?JugadorDTO;
+    public function findByIds(array $ids): ?Collection;
     public function update(JugadorDTO $jugador, array $data): bool;
     public function delete(int $id): ?bool;
     public function restore(int $id): ?bool;

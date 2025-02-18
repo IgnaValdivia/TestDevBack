@@ -240,19 +240,27 @@ class TorneoController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Lista de partidas del torneo",
+     *         description="Lista de partidas del torneo o mensaje si no hay partidas",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 type="object",
-     *                 @OA\Property(property="id", type="integer", example=101),
-     *                 @OA\Property(property="torneo_id", type="integer", example=1),
-     *                 @OA\Property(property="jugador1_id", type="integer", example=10),
-     *                 @OA\Property(property="jugador2_id", type="integer", example=20),
-     *                 @OA\Property(property="ganador_id", type="integer", example=10, nullable=true),
-     *                 @OA\Property(property="ronda", type="integer", example=1),
-     *                 @OA\Property(property="fecha", type="string", format="date-time", example="2025-03-01T12:34:56Z")
-     *             )
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=101),
+     *                         @OA\Property(property="torneo_id", type="integer", example=1),
+     *                         @OA\Property(property="jugador1_id", type="integer", example=10),
+     *                         @OA\Property(property="jugador2_id", type="integer", example=20),
+     *                         @OA\Property(property="ganador_id", type="integer", example=10, nullable=true),
+     *                         @OA\Property(property="ronda", type="integer", example=1),
+     *                         @OA\Property(property="fecha", type="string", format="date-time", example="2025-03-01T12:34:56Z")
+     *                     )
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="No hay partidas disponibles para el torneo con id: 1")
+     *                 )
+     *             }
      *         )
      *     ),
      *     @OA\Response(
@@ -262,19 +270,17 @@ class TorneoController extends Controller
      *             type="object",
      *             @OA\Property(property="message", type="string", example="Torneo con id 1 no encontrado")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="No hay partidas disponibles para el torneo",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="No hay partidas disponibles para el torneo con id: 1")
-     *         )
      *     )
      * )
      */
     public function partidas(int $id): JsonResponse
     {
+        $torneo = $this->torneoService->findById($id);
+
+        if (!$torneo) {
+            return response()->json(['message' => 'Torneo con id ' . $id . ' no encontrado'], 404);
+        }
+
         $partidas = $this->torneoService->getPartidas($id);
 
         if (empty($partidas)) {
@@ -304,14 +310,27 @@ class TorneoController extends Controller
     {
         $data = $request->validate([
             'jugadores' => 'required|array',
-            'jugadores.*' => 'integer|exists:jugadores,id',
         ]);
 
-        $asignados = $this->torneoService->asignarJugadores($id, $data['jugadores']);
+        $resultado = $this->torneoService->asignarJugadores($id, $data['jugadores']);
 
-        return $asignados
-            ? response()->json(['message' => 'Jugadores asignados correctamente'], 200)
-            : response()->json(['message' => 'Error al asignar jugadores'], 400);
+        return match (true) {
+            $resultado === null => response()->json(['message' => 'Torneo no encontrado'], 404),
+
+            is_array($resultado) && $resultado['error'] === 'no_existe' => response()->json([
+                'message' => 'Uno o más jugadores no existen',
+                'jugadores' => $resultado['jugadores']
+            ], 400),
+
+            is_array($resultado) && $resultado['error'] === 'genero_invalido' => response()->json([
+                'message' => 'Uno o más jugadores no cumplen con el requisito de género del torneo',
+                'jugadores' => $resultado['jugadores']
+            ], 400),
+
+            $resultado === true => response()->json(['message' => 'Jugadores asignados correctamente'], 200),
+
+            default => response()->json(['message' => 'Error desconocido'], 500),
+        };
     }
 
     /**
@@ -356,15 +375,70 @@ class TorneoController extends Controller
      *     path="/api/torneos/{id}/partidas/{ronda}",
      *     tags={"Torneos"},
      *     summary="Obtener partidas de una ronda específica de un torneo",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Parameter(name="ronda", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Lista de partidas de la ronda"),
-     *     @OA\Response(response=404, description="No hay partidas en esta ronda")
+     *     description="Devuelve la lista de partidas de una ronda específica dentro de un torneo.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID del torneo",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="ronda",
+     *         in="path",
+     *         description="Número de la ronda",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=2)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de partidas de la ronda o mensaje si no hay partidas",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=101),
+     *                         @OA\Property(property="torneo_id", type="integer", example=1),
+     *                         @OA\Property(property="jugador1_id", type="integer", example=10),
+     *                         @OA\Property(property="jugador2_id", type="integer", example=20),
+     *                         @OA\Property(property="ganador_id", type="integer", example=10, nullable=true),
+     *                         @OA\Property(property="ronda", type="integer", example=2),
+     *                         @OA\Property(property="fecha", type="string", format="date-time", example="2025-03-01T12:34:56Z")
+     *                     )
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="No hay partidas disponibles para la ronda 2 en el torneo con id 1")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Torneo no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Torneo con id 1 no encontrado")
+     *         )
+     *     )
      * )
      */
     public function partidasPorRonda(int $id, int $ronda): JsonResponse
     {
+        $torneo = $this->torneoService->findById($id);
+
+        if (!$torneo) {
+            return response()->json(['message' => 'Torneo con id ' . $id . ' no encontrado'], 404);
+        }
+
         $partidas = $this->torneoService->getPartidasPorRonda($id, $ronda);
+
+        if (empty($partidas)) {
+            return response()->json(['message' => 'No hay partidas disponibles para la ronda ' . $ronda . ' el torneo con id ' . $id], 200);
+        }
+
         return response()->json($partidas, 200);
     }
 }
