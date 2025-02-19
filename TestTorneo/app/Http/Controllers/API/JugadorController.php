@@ -84,7 +84,7 @@ class JugadorController extends Controller
     {
         $jugadores = $this->jugadorService->getAll($request->query('genero'));
 
-        if (empty($torneos)) {
+        if (empty($jugadores)) {
             return response()->json(['message' => 'No hay jugadores disponibles'], 200);
         }
 
