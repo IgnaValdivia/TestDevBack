@@ -27,13 +27,13 @@ class PartidaRepositoryTest extends TestCase
     public function puede_crear_una_partida()
     {
         $torneo = Torneo::factory()->create();
+        $jugador1 = Jugador::factory()->create(['genero' => $torneo->tipo]);
+        $jugador2 = Jugador::factory()->create(['genero' => $torneo->tipo]);
 
         $partida = $this->partidaRepository->create([
             'torneo_id' => $torneo->id,
-            'jugador1_id' => 1,
-            'jugador1_type' => 'App\Models\JugadorMasculino',
-            'jugador2_id' => 2,
-            'jugador2_type' => 'App\Models\JugadorMasculino',
+            'jugador1_id' => $jugador1->id,
+            'jugador2_id' => $jugador2->id,
             'ronda' => 1,
         ]);
 

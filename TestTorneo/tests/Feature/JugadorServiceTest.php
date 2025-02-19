@@ -92,7 +92,8 @@ class JugadorServiceTest extends TestCase
     public function puede_actualizar_un_jugador()
     {
         $jugador = Jugador::factory()->create();
-        $actualizado = $this->jugadorService->update($jugador->id, ['nombre' => 'Nombre Actualizado']);
+        $jugador = $this->jugadorService->findById($jugador->id);
+        $actualizado = $this->jugadorService->update($jugador, ['nombre' => 'Nombre Actualizado']);
 
         //$this->assertTrue($actualizado);
         $this->assertDatabaseHas('jugadores', ['id' => $jugador->id, 'nombre' => 'Nombre Actualizado']);

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Jugador;
 use App\Models\JugadorFemenino;
 use App\Models\JugadorMasculino;
 use App\Models\Partida;
@@ -26,19 +27,17 @@ class PartidaFactory extends Factory
         $tipoTorneo = $this->faker->randomElement(['Masculino', 'Femenino']);
 
         if ($tipoTorneo === 'Masculino') {
-            $jugador1 = JugadorMasculino::factory()->create();
-            $jugador2 = JugadorMasculino::factory()->create();
+            $jugador1 = Jugador::factory()->create(['genero' => 'Masculino']);
+            $jugador2 = Jugador::factory()->create(['genero' => 'Masculino']);
         } else {
-            $jugador1 = JugadorFemenino::factory()->create();
-            $jugador2 = JugadorFemenino::factory()->create();
+            $jugador1 = Jugador::factory()->create(['genero' => 'Femenino']);
+            $jugador2 = Jugador::factory()->create(['genero' => 'Femenino']);
         }
 
         return [
             'torneo_id' => Torneo::factory()->create(['tipo' => $tipoTorneo]), // Crear un torneo del mismo tipo
             'jugador1_id' => $jugador1->id,
-            'jugador1_type' => get_class($jugador1),
             'jugador2_id' => $jugador2->id,
-            'jugador2_type' => get_class($jugador2),
             'ronda' => $this->faker->numberBetween(1, 5),
         ];
     }
