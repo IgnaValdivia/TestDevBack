@@ -6,6 +6,9 @@ return [
         'default' => [
             'api' => [
                 'title' => 'L5 Swagger UI',
+                'servers' => [
+                    ['url' => env('L5_SWAGGER_BASE_PATH', 'http://localhost/TestGeopagos/TestTorneo/public')],
+                ],
             ],
 
             'routes' => [
