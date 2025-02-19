@@ -9,6 +9,7 @@ interface ITorneoRepository
 {
     public function getAll();
     public function findById(int $id): ?Torneo;
+    public function findByIdConPartidas(int $id): ?Torneo;
     public function create(array $data): Torneo;
     public function update(int $id, array $data): bool;
     public function delete(int $id): bool;

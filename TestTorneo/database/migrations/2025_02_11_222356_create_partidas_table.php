@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('partidas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('torneo_id')->constrained('torneos')->cascadeOnDelete();
-            $table->morphs('jugador1');
-            $table->morphs('jugador2');
+            $table->foreignId('jugador1_id')->constrained('jugadores');
+            $table->integer('puntaje1')->nullable();
+            $table->foreignId('jugador2_id')->constrained('jugadores');
+            $table->integer('puntaje2')->nullable();
             $table->foreignId('ganador_id')->nullable()->constrained('jugadores')->nullOnDelete();
             $table->integer('ronda');
             $table->timestamps();

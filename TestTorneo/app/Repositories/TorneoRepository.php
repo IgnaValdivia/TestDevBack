@@ -19,6 +19,20 @@ class TorneoRepository implements ITorneoRepository
         return Torneo::find($id);
     }
 
+    public function findByIdConPartidas(int $id): ?Torneo
+    {
+        return Torneo::with([
+            'partidas' => function ($query) {
+                $query->orderBy('ronda')->orderBy('id');
+            }
+        ])->find($id);
+    }
+
+    public function findByIdWithTrashed(int $id): ?Torneo
+    {
+        return Torneo::withTrashed()->find($id);
+    }
+
     public function create(array $data): Torneo
     {
         return Torneo::create($data);
@@ -37,11 +51,6 @@ class TorneoRepository implements ITorneoRepository
     public function restore(int $id): bool
     {
         return Torneo::where('id', $id)->restore();
-    }
-
-    public function findByIdWithTrashed(int $id): ?Torneo
-    {
-        return Torneo::withTrashed()->find($id);
     }
 
     public function getPartidas(int $torneoId): Collection

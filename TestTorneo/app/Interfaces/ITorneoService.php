@@ -4,7 +4,6 @@ namespace App\Interfaces;
 
 use App\DTOs\TorneoDTO;
 use App\Models\Partida;
-use App\Models\Torneo;
 use Illuminate\Database\Eloquent\Collection;
 
 interface ITorneoService
@@ -19,6 +18,7 @@ interface ITorneoService
     public function actualizarGanador(int $torneoId, int $ganadorId): bool;
     public function getPartidas(int $id): array;
     public function asignarJugadores(int $id, array $jugadores): array|string|bool|null;
+    public function obtenerJugadores(int $id): ?Collection;
     public function comenzarTorneo(int $id): ?array;
     public function getEstado(int $id): ?string;
     public function getPartidasPorRonda(int $id, int $ronda): array;

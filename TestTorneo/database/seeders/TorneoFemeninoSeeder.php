@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Interfaces\IJugadorFemeninoService;
+use App\Interfaces\IJugadorService;
 use App\Interfaces\Repositories\IPartidaRepository;
 use Illuminate\Database\Seeder;
 use App\Services\TorneoService;
@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 class TorneoFemeninoSeeder extends Seeder
 {
     private TorneoService $torneoService;
-    private IJugadorFemeninoService $jugadorService;
+    private IJugadorService $jugadorService;
     private IPartidaRepository $partidaRepository;
 
-    public function __construct(TorneoService $torneoService, IJugadorFemeninoService $jugadorService, IPartidaRepository $partidaRepository)
+    public function __construct(TorneoService $torneoService, IJugadorService $jugadorService, IPartidaRepository $partidaRepository)
     {
         $this->torneoService = $torneoService;
         $this->jugadorService = $jugadorService;
@@ -35,21 +35,21 @@ class TorneoFemeninoSeeder extends Seeder
 
 
             //Crear jugadores femeninos
-            $jugadores = collect();
+            $jugadores_ids = collect();
             for ($i = 1; $i <= 8; $i++) { // 8 jugadores
-                $jugador = $this->jugadorService->create([
+                $jugador = $this->jugadorService->create($torneo->tipo, [
                     'nombre' => "JugadorM$i",
                     'dni' => rand(10000000, 99999999),
                     'habilidad' => rand(0, 100),
                     'reaccion' => rand(0, 100),
                 ]);
-                $jugadores->push($jugador);
+                $jugadores_ids->push($jugador->id);
             }
 
             //Agregar jugadores al torneo
-            foreach ($jugadores as $jugador) {
-                $torneo->jugadores()->attach($jugador->id);
-            }
+            $this->torneoService->asignarJugadores($torneo->id, $jugadores_ids->toArray());
+
+            $jugadores = $this->torneoService->obtenerJugadores($torneo->id);
 
 
             //Simular las rondas del torneo (Cuartos, Semifinal, Final)
@@ -68,9 +68,7 @@ class TorneoFemeninoSeeder extends Seeder
                     $partida = $this->partidaRepository->create([
                         'torneo_id' => $torneo->id,
                         'jugador1_id' => $jugador1->id,
-                        'jugador1_type' => 'App\Models\JugadorFemenino',
                         'jugador2_id' => $jugador2->id,
-                        'jugador2_type' => 'App\Models\JugadorFemenino',
                         'ronda' => $ronda
                     ]);
 
@@ -89,7 +87,7 @@ class TorneoFemeninoSeeder extends Seeder
             $ganadorFinal = $jugadores->first();
             $this->torneoService->actualizarGanador($torneo->id, $ganadorFinal->id);
 
-            echo "El ganador del Torneo Femenino es: " . $ganadorFinal->jugador->nombre . "\n";
+            echo "El ganador del Torneo Femenino es: " . $ganadorFinal->nombre . "\n";
         });
     }
 }

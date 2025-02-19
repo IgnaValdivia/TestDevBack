@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Services\Interfaces\ITorneoService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,16 +10,16 @@ class Partida extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['jugador1_id',  'jugador1_type', 'jugador2_id', 'jugador2_type', 'ganador_id', 'ronda', 'torneo_id'];
+    protected $fillable = ['jugador1_id', 'puntaje1', 'jugador2_id', 'puntaje2', 'ganador_id', 'ronda', 'torneo_id'];
 
     public function jugador1()
     {
-        return $this->morphTo(null, 'jugador1_type', 'jugador1_id');
+        return $this->belongsTo(Jugador::class, 'jugador1_id');
     }
 
     public function jugador2()
     {
-        return $this->morphTo(null, 'jugador2_type', 'jugador2_id');
+        return $this->belongsTo(Jugador::class, 'jugador2_id');
     }
 
     public function ganador()

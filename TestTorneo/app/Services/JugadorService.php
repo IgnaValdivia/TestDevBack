@@ -138,8 +138,8 @@ class JugadorService implements IJugadorService
     public function calcularPuntaje(Jugador $jugador): int
     {
         return match ($jugador->genero) {
-            'Masculino' => $jugador->habilidad + $jugador->fuerza + $jugador->velocidad + rand(0, 10),
-            'Femenino' => $jugador->habilidad + $jugador->reaccion + rand(0, 10)
+            'Masculino' => $jugador->habilidad + $jugador->jugadorMasculino->fuerza + $jugador->jugadorMasculino->velocidad + rand(0, 10),
+            'Femenino' => $jugador->habilidad + $jugador->jugadorFemenino->reaccion + rand(0, 10)
         };
     }
 

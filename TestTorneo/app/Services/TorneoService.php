@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\PartidaDTO;
 use App\DTOs\TorneoDTO;
+use App\DTOs\TorneoPartidasDTO;
 use App\Interfaces\Repositories\IPartidaRepository;
 use App\Interfaces\Repositories\ITorneoRepository;
 use App\Models\Torneo;
@@ -97,10 +98,30 @@ class TorneoService implements ITorneoService
 
     public function determinarGanador(Partida $partida)
     {
+        $intentos = 0;
+        $maxIntentos = 3;
 
-        $ganador = $this->jugadorService->calcularPuntaje($partida->jugador1) >= $this->jugadorService->calcularPuntaje($partida->jugador2) ? $partida->jugador1 : $partida->jugador2;
+        do {
+            $puntaje1 = $this->jugadorService->calcularPuntaje($partida->jugador1);
+            $puntaje2 = $this->jugadorService->calcularPuntaje($partida->jugador2);
 
-        $this->partidaRepository->update($partida->id, ['ganador_id' => $ganador->id]);
+            if ($puntaje1 > $puntaje2) {
+                $ganador = $partida->jugador1;
+            } elseif ($puntaje2 > $puntaje1) {
+                $ganador = $partida->jugador2;
+            } else {
+                $ganador = null; // No hay ganador aún
+            }
+
+            $intentos++;
+        } while ($ganador === null && $intentos < $maxIntentos);
+
+        // Si después de los intentos sigue en empate, se elige al azar (factor suerte 2)
+        if ($ganador === null) {
+            $ganador = rand(0, 1) ? $partida->jugador1 : $partida->jugador2;
+        }
+
+        $this->partidaRepository->update($partida->id, ['puntaje1' => $puntaje1,  'puntaje2' => $puntaje2, 'ganador_id' => $ganador->id]);
 
         return $ganador;
     }
@@ -151,6 +172,11 @@ class TorneoService implements ITorneoService
         return true; // Asignación exitosa
     }
 
+    public function obtenerJugadores(int $id): ?Collection
+    {
+        return $this->torneoRepository->obtenerJugadores($id);
+    }
+
     public function comenzarTorneo(int $id): ?array
     {
         //Obtener el torneo
@@ -166,7 +192,7 @@ class TorneoService implements ITorneoService
         }
 
         //Obtener jugadores asociados al torneo
-        $jugadores = $this->torneoRepository->obtenerJugadores($id);
+        $jugadores = $this->obtenerJugadores($id);
 
         if ($jugadores->isEmpty()) {
             return ['error' => 'No hay jugadores asignados al torneo'];
@@ -222,10 +248,12 @@ class TorneoService implements ITorneoService
         //Asignar el ganador al torneo
         $this->actualizarGanador($torneo->id, $jugadores->first()->id);
 
+        // Obtener el torneo con sus partidas
+        $torneoActualizado = $this->torneoRepository->findByIdConPartidas($torneo->id);
+
         return [
-            'message' => 'Torneo comenzado y finalizado exitosamente',
-            'torneo_id' => $torneo->id,
-            'ganador_id' => $jugadores->first()->id,
+            'message' => 'Torneo comenzado exitosamente',
+            'torneo' => TorneoPartidasDTO::fromModel($torneoActualizado),
         ];
     }
 
