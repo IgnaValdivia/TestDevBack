@@ -21,11 +21,7 @@ class TorneoRepository implements ITorneoRepository
 
     public function findByIdConPartidas(int $id): ?Torneo
     {
-        return Torneo::with([
-            'partidas' => function ($query) {
-                $query->orderBy('ronda')->orderBy('id');
-            }
-        ])->find($id);
+        return Torneo::with('partidas')->find($id);
     }
 
     public function findByIdWithTrashed(int $id): ?Torneo

@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Jugador;
 use App\Models\JugadorMasculino;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\JugadorMasculino>

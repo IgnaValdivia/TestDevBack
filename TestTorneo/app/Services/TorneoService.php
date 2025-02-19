@@ -47,6 +47,23 @@ class TorneoService implements ITorneoService
         return TorneoDTO::fromModel($torneo);
     }
 
+    public function findByIdConPartidas(int $id): ?Torneo
+    {
+        $torneo = $this->torneoRepository->findByIdConPartidas($id);
+
+        if (!$torneo) {
+            return null;
+        }
+
+        $torneo->partidas = $torneo->partidas->sortBy([
+            ['ronda', 'asc'],
+            ['id', 'asc']
+        ]);
+
+        return $torneo;
+    }
+
+
     public function create(array $data): TorneoDTO
     {
         $data['estado'] = 'Pendiente';
@@ -247,7 +264,7 @@ class TorneoService implements ITorneoService
         $this->actualizarGanador($torneo->id, $jugadores->first()->id);
 
         // Obtener el torneo con sus partidas
-        $torneoActualizado = $this->torneoRepository->findByIdConPartidas($torneo->id);
+        $torneoActualizado = $this->findByIdConPartidas($torneo->id);
 
         return [
             'message' => 'Torneo comenzado exitosamente',

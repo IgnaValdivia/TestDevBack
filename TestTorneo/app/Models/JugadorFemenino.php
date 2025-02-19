@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Interfaces\IJugador;
-use App\Interfaces\IPuntajeStrategy;
-use App\Services\JugadorService;
-use App\Strategies\PuntajeFemenino;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

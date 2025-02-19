@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Interfaces\IGanadorStrategy;
 use App\Interfaces\IJugadorFemeninoService;
 use App\Interfaces\IJugadorMasculinoService;
 use App\Interfaces\IJugadorService;
@@ -21,7 +20,6 @@ use App\Services\JugadorFemeninoService;
 use App\Services\JugadorMasculinoService;
 use App\Services\JugadorService;
 use App\Services\TorneoService;
-use App\Strategies\GanadorPorHabilidad;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,11 +30,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ITorneoRepository::class, TorneoRepository::class);
-        $this->app->bind(ITorneoService::class, TorneoService::class);
         $this->app->bind(IPartidaRepository::class, PartidaRepository::class);
         $this->app->bind(IJugadorMasculinoRepository::class, JugadorMasculinoRepository::class);
         $this->app->bind(IJugadorFemeninoRepository::class, JugadorFemeninoRepository::class);
         $this->app->bind(IJugadorRepository::class, JugadorRepository::class);
+
+        $this->app->bind(ITorneoService::class, TorneoService::class);
         $this->app->bind(IJugadorService::class, JugadorService::class);
         $this->app->bind(IJugadorMasculinoService::class, JugadorMasculinoService::class);
         $this->app->bind(IJugadorFemeninoService::class, JugadorFemeninoService::class);
