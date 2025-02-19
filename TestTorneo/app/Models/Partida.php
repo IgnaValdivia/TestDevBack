@@ -24,7 +24,7 @@ class Partida extends Model
 
     public function ganador()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Jugador::class, 'ganador_id');
     }
 
     public function torneo()

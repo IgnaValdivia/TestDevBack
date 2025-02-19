@@ -228,9 +228,7 @@ class TorneoService implements ITorneoService
                     'torneo_id' => $torneo->id,
                     'ronda' => $ronda,
                     'jugador1_id' => $jugador1->id,
-                    'jugador1_type' => get_class($jugador1),
                     'jugador2_id' => $jugador2->id,
-                    'jugador2_type' => get_class($jugador2),
                 ]);
 
                 //Determinar el ganador de la partida
