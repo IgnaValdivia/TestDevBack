@@ -24,18 +24,119 @@
                         "name": "genero",
                         "in": "query",
                         "description": "Filtrar por género (Masculino, Femenino, Todos)",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "required": false
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de jugadores"
-                    },
-                    "500": {
-                        "description": "Error en el servidor"
+                        "description": "Lista de jugadores o mensaje si no hay jugadores disponibles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "id",
+                                                    "nombre",
+                                                    "dni",
+                                                    "genero",
+                                                    "habilidad"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Juan Pérez"
+                                                    },
+                                                    "dni": {
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "genero": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "Masculino",
+                                                            "Femenino"
+                                                        ]
+                                                    },
+                                                    "habilidad": {
+                                                        "type": "integer",
+                                                        "example": 85
+                                                    },
+                                                    "fuerza": {
+                                                        "type": "integer",
+                                                        "example": 80,
+                                                        "nullable": true
+                                                    },
+                                                    "velocidad": {
+                                                        "type": "integer",
+                                                        "example": 90,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "id",
+                                                    "nombre",
+                                                    "dni",
+                                                    "genero",
+                                                    "habilidad"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "nombre": {
+                                                        "type": "string",
+                                                        "example": "Juan Pérez"
+                                                    },
+                                                    "dni": {
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "genero": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "Masculino",
+                                                            "Femenino"
+                                                        ]
+                                                    },
+                                                    "habilidad": {
+                                                        "type": "integer",
+                                                        "example": 85
+                                                    },
+                                                    "reaccion": {
+                                                        "type": "integer",
+                                                        "example": 80
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No hay jugadores disponibles"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -91,12 +192,6 @@
                                         "type": "integer",
                                         "example": 90,
                                         "nullable": true
-                                    },
-                                    "reaccion": {
-                                        "description": "Campo obligatorio si el género es 'Femenino'. Rango: 0 - 100.",
-                                        "type": "integer",
-                                        "example": 70,
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -138,10 +233,6 @@
                                         "velocidad": {
                                             "type": "integer",
                                             "example": 90
-                                        },
-                                        "reaccion": {
-                                            "type": "integer",
-                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -183,9 +274,6 @@
                                 }
                             }
                         }
-                    },
-                    "500": {
-                        "description": "Error en el servidor"
                     }
                 }
             }
@@ -211,7 +299,56 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Jugador encontrado"
+                        "description": "Jugador encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "id",
+                                        "nombre",
+                                        "dni",
+                                        "genero",
+                                        "habilidad"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "nombre": {
+                                            "type": "string",
+                                            "example": "Juan Pérez"
+                                        },
+                                        "dni": {
+                                            "type": "string",
+                                            "example": "12345678"
+                                        },
+                                        "genero": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Masculino",
+                                                "Femenino"
+                                            ]
+                                        },
+                                        "habilidad": {
+                                            "type": "integer",
+                                            "example": 85
+                                        },
+                                        "fuerza": {
+                                            "type": "integer",
+                                            "example": 80,
+                                            "nullable": true
+                                        },
+                                        "velocidad": {
+                                            "type": "integer",
+                                            "example": 90,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "Jugador no encontrado"

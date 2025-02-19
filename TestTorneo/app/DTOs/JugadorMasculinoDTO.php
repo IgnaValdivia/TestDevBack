@@ -13,8 +13,8 @@ class JugadorMasculinoDTO
     public int $habilidad;
     public int $fuerza;
     public int $velocidad;
-    public string $created_at;
-    public string $updated_at;
+    //public string $created_at;
+    //public string $updated_at;
 
     public function __construct(JugadorMasculino $jugadorMasculino)
     {
@@ -25,8 +25,8 @@ class JugadorMasculinoDTO
         $this->habilidad = $jugadorMasculino->jugador->habilidad;
         $this->fuerza = $jugadorMasculino->fuerza;
         $this->velocidad = $jugadorMasculino->velocidad;
-        $this->created_at = $jugadorMasculino->created_at->toDateTimeString();
-        $this->updated_at = $jugadorMasculino->updated_at->toDateTimeString();
+        //$this->created_at = $jugadorMasculino->created_at->toDateTimeString();
+        //$this->updated_at = $jugadorMasculino->updated_at->toDateTimeString();
     }
 
     public static function fromModel(JugadorMasculino $jugadorMasculino): self

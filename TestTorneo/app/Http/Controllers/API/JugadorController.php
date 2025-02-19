@@ -38,15 +38,55 @@ class JugadorController extends Controller
      *         in="query",
      *         description="Filtrar por género (Masculino, Femenino, Todos)",
      *         required=false,
-     *         @OA\Schema(type="string")
      *     ),
-     *     @OA\Response(response=200, description="Lista de jugadores"),
-     *     @OA\Response(response=500, description="Error en el servidor")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de jugadores o mensaje si no hay jugadores disponibles",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         required={"id", "nombre", "dni", "genero", "habilidad"},
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="nombre", type="string", example="Juan Pérez"),
+     *                         @OA\Property(property="dni", type="string", example="12345678"),
+     *                         @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino"}),
+     *                         @OA\Property(property="habilidad", type="integer", example=85),
+     *                         @OA\Property(property="fuerza", type="integer", example=80, nullable=true),
+     *                         @OA\Property(property="velocidad", type="integer", example=90, nullable=true),
+     *                     ),
+     *                 ),
+     *                  @OA\Schema(
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         required={"id", "nombre", "dni", "genero", "habilidad"},
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="nombre", type="string", example="Juan Pérez"),
+     *                         @OA\Property(property="dni", type="string", example="12345678"),
+     *                         @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino"}),
+     *                         @OA\Property(property="habilidad", type="integer", example=85),
+     *                         @OA\Property(property="reaccion", type="integer", example=80),
+     *                     ),
+     *                 ),
+     *                 @OA\Schema(
+     *                     type="object",
+     *                     @OA\Property(property="message", type="string", example="No hay jugadores disponibles")
+     *                 )
+     *             }
+     *         )
+     *     )
      * )
      */
     public function index(Request $request): JsonResponse
     {
         $jugadores = $this->jugadorService->getAll($request->query('genero'));
+
+        if (empty($torneos)) {
+            return response()->json(['message' => 'No hay jugadores disponibles'], 200);
+        }
 
         return response()->json($jugadores, 200);
     }
@@ -79,13 +119,6 @@ class JugadorController extends Controller
      *                 nullable=true,
      *                 description="Campo obligatorio si el género es 'Masculino'. Rango: 0 - 100."
      *             ),
-     *             @OA\Property(
-     *                 property="reaccion",
-     *                 type="integer",
-     *                 example=70,
-     *                 nullable=true,
-     *                 description="Campo obligatorio si el género es 'Femenino'. Rango: 0 - 100."
-     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -100,7 +133,6 @@ class JugadorController extends Controller
      *             @OA\Property(property="habilidad", type="integer", example=85),
      *             @OA\Property(property="fuerza", type="integer", example=80),
      *             @OA\Property(property="velocidad", type="integer", example=90),
-     *             @OA\Property(property="reaccion", type="integer", example=null),
      *         )
      *     ),
      *     @OA\Response(
@@ -125,10 +157,6 @@ class JugadorController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Error en el servidor"
-     *     )
      * )
      */
     public function store(Request $request): JsonResponse
@@ -158,7 +186,6 @@ class JugadorController extends Controller
         return response()->json($jugador, 201);
     }
 
-
     /**
      * Obtener un jugador por ID.
      * 
@@ -174,7 +201,21 @@ class JugadorController extends Controller
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
-     *     @OA\Response(response=200, description="Jugador encontrado"),
+     *     @OA\Response(
+     *          response=200, 
+     *          description="Jugador encontrado",
+     *          @OA\JsonContent(
+     *             type="object",
+     *             required={"id", "nombre", "dni", "genero", "habilidad"},
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="nombre", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="dni", type="string", example="12345678"),
+     *             @OA\Property(property="genero", type="string", enum={"Masculino", "Femenino"}),
+     *             @OA\Property(property="habilidad", type="integer", example=85),
+     *             @OA\Property(property="fuerza", type="integer", example=80, nullable=true),
+     *             @OA\Property(property="velocidad", type="integer", example=90, nullable=true),
+     *           ),
+     *      ),
      *     @OA\Response(response=404, description="Jugador no encontrado")
      * )
      */
