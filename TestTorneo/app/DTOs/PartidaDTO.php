@@ -10,7 +10,7 @@ class PartidaDTO
     public int $torneo_id;
     public int $jugador1_id;
     public int $jugador2_id;
-    public int $ganador_id;
+    public ?int $ganador_id;
     public int $ronda;
 
     public function __construct(Partida $partida)

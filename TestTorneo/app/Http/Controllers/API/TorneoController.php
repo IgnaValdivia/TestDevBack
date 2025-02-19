@@ -23,7 +23,6 @@ class TorneoController extends Controller
         $this->torneoService = $torneoService;
     }
 
-
     /**
      * @OA\Get(
      *     path="/api/torneos",
@@ -295,15 +294,64 @@ class TorneoController extends Controller
      *     path="/api/torneos/{id}/asignar-jugadores",
      *     tags={"Torneos"},
      *     summary="Asignar jugadores a un torneo",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     description="Asigna una lista de jugadores a un torneo si cumplen con los requisitos.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del torneo",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="jugadores", type="array", @OA\Items(type="integer"))
+     *             required={"jugadores"},
+     *             @OA\Property(
+     *                 property="jugadores",
+     *                 type="array",
+     *                 description="Lista de IDs de jugadores a asignar al torneo",
+     *                 @OA\Items(type="integer", example=10)
+     *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Jugadores asignados correctamente"),
-     *     @OA\Response(response=400, description="Error al asignar jugadores")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Jugadores asignados correctamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Jugadores asignados correctamente")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error en la asignación de jugadores",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Uno o más jugadores no cumplen con los requisitos"),
+     *             @OA\Property(
+     *                 property="jugadores",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=12),
+     *                 description="Lista de jugadores que no cumplen con los requisitos"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Torneo no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Torneo no encontrado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno del servidor",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Error en el servidor al asignar jugadores")
+     *         )
+     *     )
      * )
      */
     public function asignarJugadores(Request $request, int $id): JsonResponse
@@ -338,17 +386,72 @@ class TorneoController extends Controller
      *     path="/api/torneos/{id}/comenzar",
      *     tags={"Torneos"},
      *     summary="Comenzar un torneo",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Torneo comenzado"),
-     *     @OA\Response(response=400, description="No se pudo comenzar el torneo")
+     *     description="Inicia un torneo, generando las partidas y simulando los resultados hasta obtener un ganador.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del torneo a comenzar",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Torneo comenzado exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Torneo comenzado exitosamente"),
+     *             @OA\Property(property="torneo_id", type="integer", example=1),
+     *             @OA\Property(property="ganador_id", type="integer", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="El torneo no existe",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Torneo no encontrado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="El torneo ya fue finalizado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="El torneo está finalizado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Condiciones no cumplidas para iniciar el torneo",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     @OA\Property(property="message", type="string", example="No hay jugadores asignados al torneo")
+     *                 ),
+     *                 @OA\Schema(
+     *                     @OA\Property(property="message", type="string", example="El número de jugadores debe ser potencia de 2. Faltan 3 jugadores para completar.")
+     *                 )
+     *             }
+     *         )
+     *     )
      * )
      */
     public function comenzarTorneo(int $id): JsonResponse
     {
-        $comenzado = $this->torneoService->comenzarTorneo($id);
-        return $comenzado
-            ? response()->json(['message' => 'Torneo comenzado'], 200)
-            : response()->json(['message' => 'No se pudo comenzar el torneo'], 400);
+        $resultado = $this->torneoService->comenzarTorneo($id);
+
+        if (isset($resultado['error'])) {
+            $mensaje = $resultado['error'];
+
+            return match ($mensaje) {
+                'Torneo no encontrado' => response()->json(['message' => $mensaje], 404),
+                'El torneo está finalizado' => response()->json(['message' => $mensaje], 409),
+                default => response()->json(['message' => $mensaje], 422), // Casos de jugadores insuficientes
+            };
+        }
+
+        return response()->json($resultado, 200);
     }
 
     /**

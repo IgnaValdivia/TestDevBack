@@ -1233,14 +1233,17 @@
                     "Torneos"
                 ],
                 "summary": "Asignar jugadores a un torneo",
+                "description": "Asigna una lista de jugadores a un torneo si cumplen con los requisitos.",
                 "operationId": "0fa41f499be45498e2fe474874d698d9",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID del torneo",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -1249,11 +1252,16 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "jugadores"
+                                ],
                                 "properties": {
                                     "jugadores": {
+                                        "description": "Lista de IDs de jugadores a asignar al torneo",
                                         "type": "array",
                                         "items": {
-                                            "type": "integer"
+                                            "type": "integer",
+                                            "example": 10
                                         }
                                     }
                                 },
@@ -1264,10 +1272,76 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Jugadores asignados correctamente"
+                        "description": "Jugadores asignados correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Jugadores asignados correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "400": {
-                        "description": "Error al asignar jugadores"
+                        "description": "Error en la asignación de jugadores",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Uno o más jugadores no cumplen con los requisitos"
+                                        },
+                                        "jugadores": {
+                                            "description": "Lista de jugadores que no cumplen con los requisitos",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 12
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Torneo no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error en el servidor al asignar jugadores"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1278,23 +1352,106 @@
                     "Torneos"
                 ],
                 "summary": "Comenzar un torneo",
+                "description": "Inicia un torneo, generando las partidas y simulando los resultados hasta obtener un ganador.",
                 "operationId": "ff5294ab3a96fa5951dd22c654540619",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID del torneo a comenzar",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Torneo comenzado"
+                        "description": "Torneo comenzado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo comenzado exitosamente"
+                                        },
+                                        "torneo_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "ganador_id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "400": {
-                        "description": "No se pudo comenzar el torneo"
+                    "404": {
+                        "description": "El torneo no existe",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "El torneo ya fue finalizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "El torneo está finalizado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Condiciones no cumplidas para iniciar el torneo",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "oneOf": [
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "No hay jugadores asignados al torneo"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "El número de jugadores debe ser potencia de 2. Faltan 3 jugadores para completar."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }

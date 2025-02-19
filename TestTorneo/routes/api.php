@@ -17,9 +17,7 @@ Route::middleware('api')->group(function () {
         Route::get('{id}/estado', [TorneoController::class, 'estadoTorneo'])->middleware('validate.id'); // Obtener estado de un torneo //TESTED
         Route::get('{id}/ronda/{ronda}', [TorneoController::class, 'partidasPorRonda'])->middleware('validate.id'); // Obtener partidas de cierta ronda de un torneo //TESTED
         Route::post('{id}/asignar-jugadores', [TorneoController::class, 'asignarJugadores']); //asignar jugadores a torneo //TESTED
-
-        Route::post('{id}/comenzar', [TorneoController::class, 'comenzarTorneo']); //comenzar un torneo
-
+        Route::get('{id}/comenzar', [TorneoController::class, 'comenzarTorneo']); //comenzar un torneo //TESTED
     });
 
     Route::prefix('jugadores')->group(function () {

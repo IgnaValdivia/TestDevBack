@@ -9,6 +9,7 @@ use App\Interfaces\IJugadorFemeninoService;
 use App\Interfaces\IJugadorMasculinoService;
 use App\Interfaces\IJugadorService;
 use App\Interfaces\Repositories\IJugadorRepository;
+use App\Models\Jugador;
 use App\Models\JugadorFemenino;
 use App\Models\JugadorMasculino;
 use Exception;
@@ -112,7 +113,6 @@ class JugadorService implements IJugadorService
         });
     }
 
-
     public function delete(int $id): ?bool
     {
         $jugador = $this->jugadorRepository->findById($id);
@@ -123,7 +123,6 @@ class JugadorService implements IJugadorService
 
         return $this->jugadorRepository->delete($id) ?: false;
     }
-
 
     public function restore(int $id): ?bool
     {
@@ -136,17 +135,11 @@ class JugadorService implements IJugadorService
         return $this->jugadorRepository->restore($id);
     }
 
-
-    public function calcularPuntaje(JugadorMasculino | JugadorFemenino $jugador): int
+    public function calcularPuntaje(Jugador $jugador): int
     {
-        return match (true) {
-            $jugador instanceof JugadorMasculino =>
-            $jugador->habilidad + $jugador->fuerza + $jugador->velocidad + rand(0, 10),
-
-            $jugador instanceof JugadorFemenino =>
-            $jugador->habilidad + $jugador->reaccion + rand(0, 10),
-
-            default => throw new InvalidArgumentException("Tipo de jugador no reconocido.")
+        return match ($jugador->genero) {
+            'Masculino' => $jugador->habilidad + $jugador->fuerza + $jugador->velocidad + rand(0, 10),
+            'Femenino' => $jugador->habilidad + $jugador->reaccion + rand(0, 10)
         };
     }
 

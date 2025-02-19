@@ -22,6 +22,13 @@ class PartidaRepository implements IPartidaRepository
         return Partida::create($data);
     }
 
+    public function crearPartidas(array $partidas): void
+    {
+        foreach ($partidas as $partida) {
+            Partida::create($partida);
+        }
+    }
+
     public function update(int $id, array $data): bool
     {
         return Partida::where('id', $id)->update($data);

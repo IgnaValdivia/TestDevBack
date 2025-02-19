@@ -107,13 +107,6 @@ class TorneoService implements ITorneoService
 
     public function actualizarGanador(int $torneoId, int $ganadorId): bool
     {
-        $torneo = $this->torneoRepository->findById($torneoId);
-
-        if (!$torneo) {
-            throw new Exception("Torneo no encontrado.");
-        }
-
-        // Actualizamos el torneo con el ganador
         return $this->torneoRepository->update($torneoId, ['ganador_id' => $ganadorId, 'estado' => 'Finalizado']);
     }
 
@@ -128,7 +121,7 @@ class TorneoService implements ITorneoService
         $torneo = $this->torneoRepository->findById($id);
 
         if (!$torneo) {
-            return null; // Torneo no encontrado
+            return null;
         }
 
         // Obtener los jugadores existentes en la BD
@@ -158,10 +151,82 @@ class TorneoService implements ITorneoService
         return true; // Asignación exitosa
     }
 
-    public function comenzarTorneo(int $id): bool
+    public function comenzarTorneo(int $id): ?array
     {
-        //logica de torneo
-        return true;
+        //Obtener el torneo
+        $torneo = $this->torneoRepository->findById($id);
+
+        if (!$torneo) {
+            return ['error' => 'Torneo no encontrado'];
+        }
+
+        //Verificar que no este finalizado
+        if ($torneo->estado === 'Finalizado') {
+            return ['error' => 'El torneo ya está finalizado'];
+        }
+
+        //Obtener jugadores asociados al torneo
+        $jugadores = $this->torneoRepository->obtenerJugadores($id);
+
+        if ($jugadores->isEmpty()) {
+            return ['error' => 'No hay jugadores asignados al torneo'];
+        }
+
+        //Verificar si la cantidad de jugadores es potencia de 2
+        $cantidadJugadores = count($jugadores);
+
+        if (($cantidadJugadores & ($cantidadJugadores - 1)) !== 0) {
+            //Calcular la próxima potencia de 2
+            $proximaPotencia = pow(2, ceil(log($cantidadJugadores, 2)));
+            $faltantes = $proximaPotencia - $cantidadJugadores;
+
+            return ['error' => "El número de jugadores debe ser potencia de 2. Faltan $faltantes jugadores para completar."];
+        }
+
+
+        //Iniciar el torneo
+        $ronda = 1;
+
+        while (count($jugadores) > 1) {
+            $ganadores = collect();
+
+            //Mezclar jugadores aleatoriamente
+            $jugadores = $jugadores->shuffle();
+
+            for ($i = 0; $i < count($jugadores); $i += 2) {
+                $jugador1 = $jugadores[$i];
+                $jugador2 = $jugadores[$i + 1];
+
+                // Crear la partida en el repositorio
+                $partida = $this->partidaRepository->create([
+                    'torneo_id' => $torneo->id,
+                    'ronda' => $ronda,
+                    'jugador1_id' => $jugador1->id,
+                    'jugador1_type' => get_class($jugador1),
+                    'jugador2_id' => $jugador2->id,
+                    'jugador2_type' => get_class($jugador2),
+                ]);
+
+                //Determinar el ganador de la partida
+                $ganador = $this->determinarGanador($partida);
+
+                //Guardar al ganador para la siguiente ronda
+                $ganadores->push($ganador);
+            }
+
+            //Actualizar la lista de jugadores con los ganadores
+            $jugadores = $ganadores;
+            $ronda++;
+        }
+
+        //Asignar el ganador al torneo
+        $this->actualizarGanador($torneo->id, $jugadores->first()->id);
+
+        return [
+            'message' => 'Torneo comenzado y finalizado exitosamente',
+            'torneo_id' => $torneo->id,
+            'ganador_id' => $jugadores->first()->id,
+        ];
     }
 
     public function getEstado(int $id): ?string

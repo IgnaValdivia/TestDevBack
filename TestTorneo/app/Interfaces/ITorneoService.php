@@ -19,7 +19,7 @@ interface ITorneoService
     public function actualizarGanador(int $torneoId, int $ganadorId): bool;
     public function getPartidas(int $id): array;
     public function asignarJugadores(int $id, array $jugadores): array|string|bool|null;
-    public function comenzarTorneo(int $id): bool;
+    public function comenzarTorneo(int $id): ?array;
     public function getEstado(int $id): ?string;
     public function getPartidasPorRonda(int $id, int $ronda): array;
 }

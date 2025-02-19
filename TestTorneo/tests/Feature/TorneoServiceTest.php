@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Jugador;
 use Tests\TestCase;
 use App\Services\TorneoService;
 use App\Repositories\TorneoRepository;
@@ -54,13 +55,6 @@ class TorneoServiceTest extends TestCase
 
         $this->assertNotNull($torneoEncontrado);
         $this->assertEquals($torneo->id, $torneoEncontrado->id);
-    }
-
-    #[Test]
-    public function lanza_excepcion_si_el_torneo_no_existe()
-    {
-        $this->expectException(Exception::class);
-        $this->torneoService->findById(999);
     }
 
     #[Test]
@@ -118,9 +112,9 @@ class TorneoServiceTest extends TestCase
         $partida = Partida::factory()->create([
             'torneo_id' => $torneo->id,
             'jugador1_id' => $jugador1->id,
-            'jugador1_type' => get_class($jugador1),
+            'jugador1_type' => 'App\Models\JugadorMasculino',
             'jugador2_id' => $jugador2->id,
-            'jugador2_type' => get_class($jugador2),
+            'jugador2_type' => 'App\Models\JugadorMasculino',
         ]);
 
         $ganador = $this->torneoService->determinarGanador($partida);

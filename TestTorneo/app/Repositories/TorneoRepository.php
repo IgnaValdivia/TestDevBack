@@ -49,6 +49,11 @@ class TorneoRepository implements ITorneoRepository
         return Partida::where('torneo_id', $torneoId)->get();
     }
 
+    public function obtenerJugadores(int $torneoId): Collection
+    {
+        return Torneo::find($torneoId)?->jugadores ?? collect();
+    }
+
     public function asignarJugadores(int $torneoId, array $jugadores): void
     {
         Torneo::find($torneoId)?->jugadores()->syncWithoutDetaching($jugadores);

@@ -3,8 +3,7 @@
 namespace App\Interfaces;
 
 use App\DTOs\JugadorDTO;
-use App\Models\JugadorFemenino;
-use App\Models\JugadorMasculino;
+use App\Models\Jugador;
 use Illuminate\Database\Eloquent\Collection;
 
 interface IJugadorService
@@ -14,7 +13,7 @@ interface IJugadorService
     public function update(JugadorDTO $jugador, array $data): bool;
     public function delete(int $id): ?bool;
     public function restore(int $id): ?bool;
-    public function calcularPuntaje(JugadorMasculino | JugadorFemenino $jugador): int;
+    public function calcularPuntaje(Jugador $jugador): int;
     public function getTorneos(int $id,  ?bool $soloGanados): array;
     public function getPartidas(int $id, string $filtro): array;
 }
