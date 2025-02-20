@@ -6,10 +6,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Torneo;
 use App\Models\Jugador;
+use App\Models\JugadorMasculino;
 use App\Models\Partida;
 use PHPUnit\Framework\Attributes\Test;
 
-class TorneoControllerTest extends TestCase
+class TorneoApiTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -60,7 +61,14 @@ class TorneoControllerTest extends TestCase
         $response = $this->postJson(route('torneos.store'), []);
 
         $response->assertStatus(400)
-            ->assertJsonStructure(['message', 'errors']);
+            ->assertJsonStructure([
+                'error',
+                'detalles' => [
+                    'nombre',
+                    'tipo',
+                    'fecha'
+                ]
+            ]);
     }
 
     //Obtener un torneo por ID
@@ -196,8 +204,8 @@ class TorneoControllerTest extends TestCase
     #[test]
     public function puede_comenzar_un_torneo()
     {
-        $torneo = Torneo::factory()->create();
-        $jugadores = Jugador::factory()->count(4)->create(['genero' => $torneo->tipo])->pluck('id')->toArray();
+        $torneo = Torneo::factory()->create(['tipo' => 'Masculino']);
+        $jugadores = JugadorMasculino::factory()->count(4)->create()->pluck('id')->toArray();
         $torneo->jugadores()->attach($jugadores);
 
         $response = $this->getJson(route('torneos.comenzar', ['id' => $torneo->id]));

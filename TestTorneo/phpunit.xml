@@ -19,6 +19,7 @@
     </source>
     <php>
         <env name="APP_URL" value="http://localhost/TestGeopagos/TestTorneo/public/"/>
+        <!--<env name="APP_URL" value="http://164.90.153.140"/>-->
         <env name="API_PREFIX" value="api"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
@@ -26,6 +27,7 @@
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_DATABASE" value="testing"/>
         <env name="DB_USERNAME" value="root"/>
+        <!--<env name="DB_PASSWORD" value="root"/>-->
         <env name="DB_PASSWORD" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

@@ -1193,11 +1193,13 @@
                     "Torneos"
                 ],
                 "summary": "Actualizar un torneo",
+                "description": "Permite actualizar los datos de un torneo existente. Solo se pueden modificar ciertos atributos, como el nombre, la fecha y el estado.",
                 "operationId": "efcf4386945898751d6517127e6b96e4",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
+                        "description": "ID del torneo a actualizar",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1209,20 +1211,37 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [],
                                 "properties": {
                                     "nombre": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Torneo Nacional 2025"
                                     },
                                     "tipo": {
                                         "type": "string",
                                         "enum": [
                                             "Masculino",
                                             "Femenino"
-                                        ]
+                                        ],
+                                        "example": "Masculino"
                                     },
                                     "fecha": {
                                         "type": "string",
-                                        "format": "date"
+                                        "format": "date",
+                                        "example": "2025-06-01"
+                                    },
+                                    "estado": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Finalizado",
+                                            "Pendiente"
+                                        ],
+                                        "example": "Pendiente"
+                                    },
+                                    "ganador_id": {
+                                        "type": "integer",
+                                        "example": 5,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -1232,10 +1251,60 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Torneo actualizado"
+                        "description": "Torneo actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo actualizado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Torneo no encontrado"
+                        "description": "Torneo no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Torneo no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error en la validación o imposibilidad de actualización",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se pudo actualizar el torneo"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "ganador_id": [
+                                                    "El ganador seleccionado no es válido"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },
