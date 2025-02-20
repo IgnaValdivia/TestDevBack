@@ -60,7 +60,7 @@ class TorneoApiTest extends TestCase
     {
         $response = $this->postJson(route('torneos.store'), []);
 
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJsonStructure([
                 'error',
                 'detalles' => [
@@ -235,8 +235,8 @@ class TorneoApiTest extends TestCase
 
         $response = $this->getJson(route('torneos.comenzar', ['id' => $torneo->id]));
 
-        $response->assertStatus(409)
-            ->assertJson(['message' => 'El torneo está finalizado']);
+        $response->assertStatus(422)
+            ->assertJson(['message' => 'El torneo ya está finalizado']);
     }
 
     //Comenzar torneo (Sin jugadores)
