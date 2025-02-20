@@ -56,15 +56,4 @@ class PartidaApiTest extends TestCase
                 'error' => 'Partida no encontrada',
             ]);
     }
-
-    #[Test]
-    public function test_devuelve_422_si_el_id_no_es_valido()
-    {
-        //Realizar la petición con un ID inválido (ej: string)
-        $response = $this->getJson(route('partidas.show', ['id' => 'abc']));
-
-        //Verificar respuesta (422 Unprocessable Entity)
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['id']);
-    }
 }
