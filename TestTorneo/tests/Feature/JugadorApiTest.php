@@ -7,12 +7,14 @@ use Tests\TestCase;
 use App\Models\Jugador;
 use App\Models\Torneo;
 use App\Models\Partida;
+use PHPUnit\Framework\Attributes\Test;
 
 class JugadorApiTest extends TestCase
 {
     use RefreshDatabase;
 
     //Obtener todos los jugadores 
+    #[Test]
     public function test_obtener_todos_los_jugadores()
     {
         Jugador::factory()->count(3)->create();
@@ -24,6 +26,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener todos los jugadores (sin jugadores creados)
+    #[Test]
     public function test_obtener_todos_los_jugadores_sin_existencia()
     {
         $response = $this->getJson(route('jugadores.index'));
@@ -33,6 +36,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener jugador por ID 
+    #[Test]
     public function test_obtener_jugador_por_id()
     {
         $jugador = Jugador::factory()->create();
@@ -44,6 +48,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener jugador por ID (No existe)
+    #[Test]
     public function test_obtener_jugador_por_id_no_existente()
     {
         $response = $this->getJson(route('jugadores.show', ['id' => 999]));
@@ -53,6 +58,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener jugador por DNI
+    #[Test]
     public function test_obtener_jugador_por_dni()
     {
         $jugador = Jugador::factory()->create();
@@ -64,6 +70,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Crear un jugador
+    #[Test]
     public function test_crear_jugador()
     {
         $datos = [
@@ -82,6 +89,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Crear jugador con datos inválidos
+    #[Test]
     public function test_crear_jugador_con_datos_invalidos()
     {
         $datos = [
@@ -97,6 +105,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Actualizar jugador
+    #[Test]
     public function test_actualizar_jugador()
     {
         $jugador = Jugador::factory()->create();
@@ -113,6 +122,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Intentar cambiar el género (Error) 
+    #[Test]
     public function test_no_se_puede_cambiar_genero()
     {
         $jugador = Jugador::factory()->create();
@@ -124,6 +134,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Eliminar jugador
+    #[Test]
     public function test_eliminar_jugador()
     {
         $jugador = Jugador::factory()->create();
@@ -134,7 +145,8 @@ class JugadorApiTest extends TestCase
             ->assertJson(['message' => 'Jugador eliminado correctamente']);
     }
 
-    //Obtener torneos de un jugador**
+    //Obtener torneos de un jugador
+    #[Test]
     public function test_obtener_torneos_de_un_jugador()
     {
         $jugador = Jugador::factory()->create();
@@ -149,6 +161,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener torneos cuando no tiene 
+    #[Test]
     public function test_obtener_torneos_de_un_jugador_sin_torneos()
     {
         $jugador = Jugador::factory()->create();
@@ -160,6 +173,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener partidas jugadas por un jugador 
+    #[Test]
     public function test_obtener_partidas_de_un_jugador()
     {
         $jugador = Jugador::factory()->create();
@@ -180,6 +194,7 @@ class JugadorApiTest extends TestCase
     }
 
     //Obtener partidas cuando el jugador no tiene
+    #[Test]
     public function test_obtener_partidas_de_un_jugador_sin_partidas()
     {
         $jugador = Jugador::factory()->create();
